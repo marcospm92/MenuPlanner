@@ -1,0 +1,11 @@
+Comidas
+Arroz con champiñones y queso feta. Pavo;Arroz:120:g:Champiñones:::Queso feta:50:g:Pavo:120:g
+Pasta de colores con huevos cocidos, hummus, verdura y aguacate;Pasta de colores:120:g:Huevos cocidos:2::Hummus:60:g:Verdura:::Aguacate:1/2:
+Chuletas de pavo con boniato y verdura;Boniato:180:g:Verdura:::Chuletas de pavo:120:g
+Muslos de pollo con boniato;Boniato:180:g:Muslos de pollo:2::Cebolla:::Tomate::
+Patata al horno con verdura y burger vegetal;Patata:180:g:Verdura:::Burger vegetal:120:g
+Ensalada de arroz y quinoa;Arroz:80:g:Quinoa:80:g:Zanahoria:::Tomate:::Aceitunas negras:5::Aguacate:1/2::Semillas::
+Pasta de colores con cangrejo y lechuga. Pescado;Pasta de colores:120:g:Palitos de cangrejo:2::Pescado:120:g:Lechuga::
+Pasta de espelta con champiñones y tortilla;Pasta de espelta:120:g:Champiñones:::Pimiento:::Huevo:1::Clara de huevo:80:ml:Especias::
+Arroz con alcachofas y pollo;Arroz:120:g:Alcachofas:::Pollo:120:g
+Arroz con berenjena y tofu;Arroz:120:g:Berenjena:::Pimineto:::Frutos secos:15:g:Tofu:100:g
