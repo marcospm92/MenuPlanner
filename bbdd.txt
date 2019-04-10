@@ -1,13 +1,29 @@
 Comida;Arroz con champiñones y queso feta. Pavo;Arroz:120:g:Champiñones:::Queso feta:50:g:Pavo:120:g
-Comida;Pasta de colores con huevos cocidos, hummus, verdura y aguacate;Pasta de colores:120:g:Huevos cocidos:2::Hummus:60:g:Verdura:::Aguacate:1/2:
-Comida;Chuletas de pavo con boniato y verdura;Boniato:180:g:Verdura:::Chuletas de pavo:120:g
-Comida;Muslos de pollo con boniato;Boniato:180:g:Muslos de pollo:2::Cebolla:::Tomate::
-Comida;Patata al horno con verdura y burger vegetal;Patata:180:g:Verdura:::Burger vegetal:120:g
-Comida;Ensalada de arroz y quinoa;Arroz:80:g:Quinoa:80:g:Zanahoria:::Tomate:::Aceitunas negras:5::Aguacate:1/2::Semillas::
-Comida;Pasta de colores con cangrejo y lechuga. Pescado;Pasta de colores:120:g:Palitos de cangrejo:2::Pescado:120:g:Lechuga::
-Comida;Pasta de espelta con champiñones y tortilla;Pasta de espelta:120:g:Champiñones:::Pimiento:::Huevo:1::Clara de huevo:80:ml:Especias::
+Comida;Pasta de colores con huevos cocidos, hummus, verdura y aguacate;Pasta colores:120:g:Huevos cocidos:2::Hummus:60:g:Verdura:::Aguacate:0.5:
+Comida;Pavo, boniato y verdura;Boniato:180:g:Verdura:::Pavo:120:g
+Comida;Muslos de pollo con boniato;Boniato:180:g:Muslos pollo:2::Cebolla:::Tomate::
+Comida;Patata al horno con verdura y burger vegetal;Patata:180:g:Verdura:::Burger veget.:120:g
+Comida;Ensalada de arroz y quinoa;Arroz:80:g:Quinoa:80:g:Zanahoria:::Tomate:::Aceitunas negras:5::Aguacate:0.5::Semillas::
+Comida;Pasta de colores con cangrejo y lechuga. Pescado;Pasta colores:120:g:Palitos cangrejo:2::Pescado:120:g:Lechuga::
+Comida;Pasta de espelta con champiñones y tortilla;Pasta espelta:120:g:Champiñones:::Pimiento:::Huevo:1::Clara huevo:80:ml:Especias::
 Comida;Arroz con alcachofas y pollo;Arroz:120:g:Alcachofas:::Pollo:120:g
-Comida;Arroz con berenjena y tofu;Arroz:120:g:Berenjena:::Pimineto:::Frutos secos:15:g:Tofu:100:g
-Cena;Ensalada de salmón ahumado;Lechuga:::Aguacate:1/2::Salmón ahumado:130:g:Tomates cherry:::Olivas negras:4-5::Pepino::
-Cena;Gazpacho, verdura, gambas y burger vegetal;Gazpacho:250:ml:Verdura:::Gambitas:40:g:Burger vegetal:120:g
-Cena;Ensalada de canónigos, rúcula y tofu;Canónigos:::Rúcula:::Frutos secos:15:g:Tofu:120:g:Tomate:::Olivas negras:3-4:Fruta:1:
+Comida;Arroz con berenjena y tofu;Arroz:120:g:Berenjena:::Pimiento:::Frutos secos:15:g:Tofu:100:g
+Comida;Pasta de espelta con verdura y burger;Pasta espelta:120:g:Verdura:::Burger:120:g:
+Comida;Ternera con guisantes y calabacín;Ternera:120:g:Guisantes:180:g:Calabacín::
+Comida;Ensalada de quinoa y canónigos. Burger;Quinoa:120:g:Burger:120:g:Tomate:::Pepino:::Canónigos:::Frutos secos:15:g
+Comida;Arroz con espárragos y pollo;Arroz:120:g:Espárragos:::Pollo:120:g
+Comida;Patata al horno con berenjena. Pescado;Patata:180:g:Berenjena:::Pescado:120:g
+Comida;Pasta integral con champiñones y huevos a la plancha;Pasta integral:120:g:Tomate:::Champiñones:::Tomate tami.:2:cuch.:Especias:::Huevos plancha:2:
+Comida;Boniato, calabacín y burger;Boniato:180:g:Calabacín:::Burger:120:g
+Comida;Pasta de colores con gambas, tofu y verdura;Pasta colores:120:g:Tomate tami.:2:cuch.:Gambitas:40:g:Verdura:::Tofu:100:g
+Cena;Ensalada de salmón ahumado;Lechuga:::Aguacate:0.5::Salmón ahum.:130:g:Tomates cherry:::Aceitunas negras:5::Pepino::
+Cena;Gazpacho, verdura, gambitas y burger vegetal;Gazpacho:250:ml:Verdura:::Gambitas:40:g:Burger veget.:120:g
+Cena;Ensalada de canónigos, lechuga y tofu;Canónigos:::Lechuga:::Frutos secos:15:g:Tofu:120:g:Tomate:::Aceitunas negras:4::Fruta:1:
+Cena;Tortilla de pavo y brócoli;Huevo:1::Clara huevo:100:ml:Lonchas pavo:40:g:Especias:::Brócoli::
+Cena;Sepia y verdura;Sepia:130:g:Verdura::
+Cena;Verdura, aguacate y burger;Verdura:::Aguacate:0.5::Burger:120:g
+Cena;Burger vegetal, champiñones, espárragos y queso crema;Burger veget.:120:g:Champiñones:250:g:Espárragos:::Queso crema:50:g
+Cena;Fajita fit;Huevo:1::Clara:50:ml:Copos avena:20:g:Especias:::Pollo:80:g:Champiñones:::Cebolla:::Pimiento::
+Cena;Ensalada de queso fresco, salmón y manzana;Lechuga:::Tomate:::Queso fresco:1::Salmón ahum.:130:g:Pepino:::Manzana:1:
+Cena;Revuelto de huevo y verdura;Huevo:1::Clara huevo:100:ml:Verdura:::
+Cena;Pescado y verdura;Verdura:::Pescado:120:g
