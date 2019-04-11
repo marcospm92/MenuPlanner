@@ -9,13 +9,20 @@ Comida;Pasta de espelta con champiñones y tortilla;Pasta espelta:120:g:Champiñ
 Comida;Arroz con alcachofas y pollo;Arroz:120:g:Alcachofas:::Pollo:120:g
 Comida;Arroz con berenjena y tofu;Arroz:120:g:Berenjena:::Pimiento:::Frutos secos:15:g:Tofu:100:g
 Comida;Pasta de espelta con verdura y burger;Pasta espelta:120:g:Verdura:::Burger:120:g:
-Comida;Ternera con guisantes y calabacín;Ternera:120:g:Guisantes:180:g:Calabacín::
+Comida;Ternera con guisantes y calabacín;Ternera:120:g:Guisantes:170:g:Calabacín::
 Comida;Ensalada de quinoa y canónigos. Burger;Quinoa:120:g:Burger:120:g:Tomate:::Pepino:::Canónigos:::Frutos secos:15:g
 Comida;Arroz con espárragos y pollo;Arroz:120:g:Espárragos:::Pollo:120:g
 Comida;Patata al horno con berenjena. Pescado;Patata:180:g:Berenjena:::Pescado:120:g
 Comida;Pasta integral con champiñones y huevos a la plancha;Pasta integral:120:g:Tomate:::Champiñones:::Tomate tami.:2:cuch.:Especias:::Huevos plancha:2:
 Comida;Boniato, calabacín y burger;Boniato:180:g:Calabacín:::Burger:120:g
 Comida;Pasta de colores con gambas, tofu y verdura;Pasta colores:120:g:Tomate tami.:2:cuch.:Gambitas:40:g:Verdura:::Tofu:100:g
+Comida;Hamburguesa;Pan molde integral:60:g:Burger:120:g:Lechuga:::Tomate:::Cebolla:::Champiñones:::Aguacate:0.5:
+Comida;Patata al horno con calabacín. Pescado;Patata:180:g:Calabacín:::Cebolla:::Especias:::Pescado:150:g
+Comida;Patata al horno con calabacín y sepia;Patata:180:g:Calabacín:::Cebolla:::Especias:::Sepia:150:g
+Comida;Guisantes, gambitas, espárragos y pollo;Guisantes:140:g:Gambitas:30:g:Pollo:120:g:Espárragos::
+Comida;Pasta integral con queso crema y pavo;Pasta integral:120:g:Tomate:::Aceitunas negras:5::Tomate tami.:2:cuch.:Queso crema:50:g:Especias:::Pavo:120:g
+Comida;Arroz con champiñones y muslos de pollo;Arroz:120:g:Champiñones:::Zanahoria:::Especias:::Muslos de pollo:2:
+Comida;Pasta integral con brócoli y huevos a la plancha;Pasta integral:120:g:Tomate tami.:2:cuch.:Brócoli:::Huevos plancha:2:
 Cena;Ensalada de salmón ahumado;Lechuga:::Aguacate:0.5::Salmón ahum.:130:g:Tomates cherry:::Aceitunas negras:5::Pepino::
 Cena;Gazpacho, verdura, gambitas y burger vegetal;Gazpacho:250:ml:Verdura:::Gambitas:40:g:Burger veget.:120:g
 Cena;Ensalada de canónigos, lechuga y tofu;Canónigos:::Lechuga:::Frutos secos:15:g:Tofu:120:g:Tomate:::Aceitunas negras:4::Fruta:1:

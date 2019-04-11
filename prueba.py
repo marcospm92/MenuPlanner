@@ -34,6 +34,19 @@ def show_recipes(tipo):
             else:
                 print("\t-", ingrediente + ":", " ".join(map(str, medidas)))
 
+# Función para buscar en cualquiera de los diccionarios
+def search_recipes(filtro, tipo = ""):
+    if tipo == "":
+        search_recipes(filtro, dict_comidas)
+        search_recipes(filtro, dict_cenas)
+    else:
+        for plato, ingredientes in tipo.items():
+            if plato.upper() == filtro.upper():
+                print("-",plato)
+            for ingrediente, medidas in ingredientes.items():
+                if (ingrediente.upper() == filtro.upper()):
+                    print("-", plato)
+
 def load_data():
     cantidad = []
     ind = 0
@@ -143,6 +156,10 @@ def generate_menu():
             while j < 7:
                 comida2 = random.choice(list(dict_comidas.keys()))
                 cena2 = random.choice(list(dict_cenas.keys()))
+                if comida1 == comida2 or cena1 == cena2:
+                    saltar = 1
+                if comida2 in comidas_wip or cena2 in cenas_wip:
+                    saltar = 1
                 if "Arroz" in dict_comidas[comida1].keys() and "Arroz" in dict_comidas[comida2].keys(): # No arroz dos comidas consecutivas
                    saltar = 1
                 if "Boniato" in dict_comidas[comida1].keys() and "Boniato" in dict_comidas[comida2].keys(): # No boniato dos comidas consecutivas
@@ -302,11 +319,19 @@ def generate_ingr_list():
     lista_ingrUd = []
     lista_ingrN = []
     #try:
+    personas = int(input("Introduce número de personas para los cálculos: "))
     for item in menu_com:
         for key, value in dict_comidas.get(item).items():
             if key not in lista_ingr:
                 lista_ingr.append(key)
-                lista_ingrCant.append(value[0])
+                if value[0] != "":
+                    if ((value[0] == "0.5") or (value[0] == "1.0")
+                    or (value[0] == "1.5") or (value[0] == "2.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
+                        lista_ingrCant.append(str(personas*float(value[0])))
+                    else:
+                        lista_ingrCant.append(str(personas*int(value[0])))
+                else:
+                    lista_ingrCant.append(value[0])
                 lista_ingrUd.append(value[1])
                 lista_ingrN.append(1)
             else:
@@ -315,11 +340,17 @@ def generate_ingr_list():
                         if lista_ingrUd[lista_ingr.index(key)] == value[1]:
                             if lista_ingrCant[lista_ingr.index(key)] != "":
                                 if ((lista_ingrCant[lista_ingr.index(key)] == "0.5") or (lista_ingrCant[lista_ingr.index(key)] == "1.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "1.5") or (lista_ingrCant[lista_ingr.index(key)] == "2.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
-                                    lista_ingrCant[lista_ingr.index(key)] = float(lista_ingrCant[lista_ingr.index(key)]) + float(value[0])
+                                or (lista_ingrCant[lista_ingr.index(key)] == "1.5") or (lista_ingrCant[lista_ingr.index(key)] == "2.0")
+                                or (lista_ingrCant[lista_ingr.index(key)] == "2.5") or (lista_ingrCant[lista_ingr.index(key)] == "3.0")
+                                or (lista_ingrCant[lista_ingr.index(key)] == "3.5") or (lista_ingrCant[lista_ingr.index(key)] == "4.0")
+                                or (lista_ingrCant[lista_ingr.index(key)] == "4.5") or (lista_ingrCant[lista_ingr.index(key)] == "5.0")
+                                or (lista_ingrCant[lista_ingr.index(key)] == "5.5") or (lista_ingrCant[lista_ingr.index(key)] == "6.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
+                                    print(lista_ingrCant[lista_ingr.index(key)], value[0])
+                                    lista_ingrCant[lista_ingr.index(key)] = float(lista_ingrCant[lista_ingr.index(key)]) + float(personas)*float(value[0])
                                     lista_ingrCant[lista_ingr.index(key)] = str(lista_ingrCant[lista_ingr.index(key)])
                                 else:
-                                    lista_ingrCant[lista_ingr.index(key)] = int(lista_ingrCant[lista_ingr.index(key)]) + int(value[0])
+
+                                    lista_ingrCant[lista_ingr.index(key)] = int(lista_ingrCant[lista_ingr.index(key)]) + personas*int(value[0])
                                     lista_ingrCant[lista_ingr.index(key)] = str(lista_ingrCant[lista_ingr.index(key)])
                             lista_ingrN[lista_ingr.index(key)] = lista_ingrN[lista_ingr.index(key)] + 1
                         else:
@@ -328,7 +359,14 @@ def generate_ingr_list():
         for key, value in dict_cenas.get(item).items():
             if key not in lista_ingr:
                 lista_ingr.append(key)
-                lista_ingrCant.append(value[0])
+                if value[0] != "":
+                    if ((value[0] == "0.5") or (value[0] == "1.0")
+                    or (value[0] == "1.5") or (value[0] == "2.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
+                        lista_ingrCant.append(str(personas*float(value[0])))
+                    else:
+                        lista_ingrCant.append(str(personas*int(value[0])))
+                else:
+                    lista_ingrCant.append(value[0])
                 lista_ingrUd.append(value[1])
                 lista_ingrN.append(1)
             else:
@@ -337,11 +375,15 @@ def generate_ingr_list():
                         if lista_ingrUd[lista_ingr.index(key)] == value[1]:
                             if lista_ingrCant[lista_ingr.index(key)] != "":
                                 if ((lista_ingrCant[lista_ingr.index(key)] == "0.5") or (lista_ingrCant[lista_ingr.index(key)] == "1.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "1.5") or (lista_ingrCant[lista_ingr.index(key)] == "2.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
-                                    lista_ingrCant[lista_ingr.index(key)] = float(lista_ingrCant[lista_ingr.index(key)]) + float(value[0])
+                                or (lista_ingrCant[lista_ingr.index(key)] == "1.5") or (lista_ingrCant[lista_ingr.index(key)] == "2.0")
+                                or (lista_ingrCant[lista_ingr.index(key)] == "2.5") or (lista_ingrCant[lista_ingr.index(key)] == "3.0")
+                                or (lista_ingrCant[lista_ingr.index(key)] == "3.5") or (lista_ingrCant[lista_ingr.index(key)] == "4.0")
+                                or (lista_ingrCant[lista_ingr.index(key)] == "4.5") or (lista_ingrCant[lista_ingr.index(key)] == "5.0")
+                                or (lista_ingrCant[lista_ingr.index(key)] == "5.5") or (lista_ingrCant[lista_ingr.index(key)] == "6.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
+                                    lista_ingrCant[lista_ingr.index(key)] = float(lista_ingrCant[lista_ingr.index(key)]) + float(personas)*float(value[0])
                                     lista_ingrCant[lista_ingr.index(key)] = str(lista_ingrCant[lista_ingr.index(key)])
                                 else:
-                                    lista_ingrCant[lista_ingr.index(key)] = int(lista_ingrCant[lista_ingr.index(key)]) + int(value[0])
+                                    lista_ingrCant[lista_ingr.index(key)] = int(lista_ingrCant[lista_ingr.index(key)]) + personas*int(value[0])
                                     lista_ingrCant[lista_ingr.index(key)] = str(lista_ingrCant[lista_ingr.index(key)])
                             lista_ingrN[lista_ingr.index(key)] = lista_ingrN[lista_ingr.index(key)] + 1
                         else:
@@ -349,11 +391,16 @@ def generate_ingr_list():
 
     c = canvas.Canvas("lista_ingredientes.pdf")
     y = 0
-    c.drawString(100,790,"LISTA DE INGREDIENTES")
+    x = 100
+    string = "LISTA DE INGREDIENTES PARA " + str(personas)
+    c.drawString(200,790,string)
     for item in range(len(lista_ingr)):
         print(str(lista_ingrN[item])+ "x -  " + lista_ingr[item] + ": " + lista_ingrCant[item] + " " + lista_ingrUd[item])
-        c.drawString(100,750-y,str(lista_ingrN[item])+ "x -  " + lista_ingr[item] + ": " + lista_ingrCant[item] + " " + lista_ingrUd[item])
+        c.drawString(x,750-y,str(lista_ingrN[item])+ "x -  " + lista_ingr[item] + ": " + lista_ingrCant[item] + " " + lista_ingrUd[item])
         y = y + 15
+        if (750 - y) <= 100:
+            x = 350
+            y = 0
     c.save()
 
     #except:
@@ -419,7 +466,23 @@ while(1):
         input("\nPulsa Enter para volver al menú principal")
 
     elif menu_ppal == 4:
-        print("Error")
+        print("Buscar platos")
+        filtro = input("Introduce el plato o ingrediente a buscar: ")
+        print("\t1. Buscar en comidas")
+        print("\t2. Buscar en cenas")
+        print("\t3. Buscar en comidas y cenas")
+        menu_search = int(input("Selecciona la opción: "))
+        if menu_search == 1:
+            print("BUSCAR EN COMIDAS")
+            search_recipes(filtro, dict_comidas)
+        elif menu_search == 2:
+            print("BUSCAR EN CENAS")
+            search_recipes(filtro, dict_cenas)
+        elif menu_search == 3:
+            print("BUSCAR EN COMIDAS Y CENAS")
+            search_recipes(filtro)
+        else:
+            print("Error")
         input("Pulsa Enter para volver al menú principal")
 
     elif menu_ppal == 5:
