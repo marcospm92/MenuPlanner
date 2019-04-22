@@ -4,7 +4,7 @@
 __author__ = 'Marcos Pérez Martín'
 __title__= 'MenuPlanner'
 __date__ = '2019'
-__version__ = '1.0'
+__version__ = '1.1'
 
 from tkinter import *
 from tkinter import ttk
@@ -22,7 +22,7 @@ from reportlab.pdfgen import canvas
 
 dict_comidas = {}
 dict_cenas = {}
-modo_grafico = True
+modo_grafico = False
 comidas = []
 cenas = []
 menu_com = []
@@ -167,6 +167,7 @@ def generate_menu(semanas):
             while primera_ok == 0:
                 pescado_semana = 0
                 boniato_semana = 0
+                hamburguesa_semana = 0
                 cena1 = random.choice(list(dict_cenas.keys()))
                 comida1 = random.choice(list(dict_comidas.keys()))
                 j = 1
@@ -179,7 +180,7 @@ def generate_menu(semanas):
                     boniato_semana = boniato_semana + 1
                 if "Boniato" in dict_cenas[cena1].keys():
                     boniato_semana = boniato_semana + 1
-                if pescado_semana < 2 and boniato_semana < 2:
+                if pescado_semana < 2 and boniato_semana < 2 and comida1 != "Hamburguesa":
                     primera_ok = 1
 
             cenas_wip.append(cena1)
@@ -213,6 +214,9 @@ def generate_menu(semanas):
                    saltar = 1
                 if "Pollo" in dict_comidas[comida1].keys() and "Pavo" in dict_comidas[comida2].keys(): # No pollo dos comidas seguidas
                    saltar = 1
+                if comida2 == "Hamburguesa": # Si ha salido hamburguesa y no es viernes, sábado o domingo no nos vale
+                    if (j != 4 and j != 5 and j != 6):
+                        saltar = 1
                 if saltar == 0:
                    comidas_wip.append(comida2)
                    cenas_wip.append(cena2)
@@ -225,15 +229,18 @@ def generate_menu(semanas):
                        pescado_semana = pescado_semana + 1
                    if "Boniato" in dict_comidas[comida2].keys():
                        boniato_semana = boniato_semana + 1
+                   if comida2 == "Hamburguesa":
+                       hamburguesa_semana = hamburguesa_semana + 1
                 saltar = 0
 
             # Una vez generada una semana chequeo condiciones
-            if pescado_semana <= 2 and pescado_semana >=1 and boniato_semana <= 2:
+            if pescado_semana <= 2 and pescado_semana >=1 and boniato_semana <= 2 and hamburguesa_semana == 1:
                 print("Menu OK")
-                print("Pescado:", pescado_semana, "Boniato:", boniato_semana)
+                print("Pescado:", pescado_semana, "Boniato:", boniato_semana, "Hamburguesa:", hamburguesa_semana)
                 print("Intentos:",intentos)
                 pescado_semana = 0
                 boniato_semana = 0
+                hamburguesa_semana = 0
                 menu_ok = 1
                 intentos = 0
                 comidas.extend(comidas_wip)
