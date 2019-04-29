@@ -4,7 +4,7 @@
 __author__ = 'Marcos Pérez Martín'
 __title__= 'MenuPlanner'
 __date__ = '2019'
-__version__ = '1.1'
+__version__ = '1.2'
 
 from tkinter import *
 from tkinter import ttk
@@ -86,7 +86,8 @@ def load_data():
     with open("bbdd.txt") as f:
         lists = [line.strip().split(';') for line in f.readlines()]
     for line in lists:
-        #if(len(line) == 1):
+        if(line[0][0] == "#"): # Se ignora lo que venga en esa línea
+            continue
         if(line[0] == "Comida"):
             com_cen="com"
             dict_comidas[line[1]] = {}
