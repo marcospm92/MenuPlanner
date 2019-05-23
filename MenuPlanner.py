@@ -1,14 +1,19 @@
-# estructura diccionarios comidas y cenas {"plato":{"ingrediente":{cantidad,"ud medida"}}}
+# !/usr/bin/python
+# -*- coding: utf-8 -*-
+
+# estructura diccionarios comidas y cenas
+# {"plato":{"ingrediente":{cantidad,"ud medida"}}}
 
 
 __author__ = 'Marcos Pérez Martín'
-__title__= 'MenuPlanner'
+__title__ = 'MenuPlanner'
 __date__ = '2019'
-__version__ = '1.2'
+__version__ = '1.3'
 
-from tkinter import *
+from tkinter import Frame, Scrollbar, VERTICAL, Y, RIGHT, Canvas, LEFT, BOTH
+from tkinter import Widget, Tk, Menu, TOP, Toplevel, RAISED, Label, Button
+from tkinter import IntVar, SUNKEN, W, StringVar
 from tkinter import ttk
-import csv
 import time
 import os
 import sys
@@ -29,6 +34,7 @@ menu_com = []
 menu_cen = []
 var = ""
 
+
 def clear():
     SO = sys.platform
     if SO == "linux":
@@ -37,6 +43,7 @@ def clear():
         os.system('cls')
     else:
         print("Error al limpiar la pantalla. Fallo al detectar SO")
+
 
 # Función para mostrar cualquiera de los diccionarios de comidas o cenas
 def show_recipes(tipo):
@@ -47,21 +54,23 @@ def show_recipes(tipo):
         elif tipo == "cena":
             tipo = dict_cenas
         for plato, ingredientes in tipo.items():
-            print("\n*",plato)
+            print("\n*", plato)
             var = var + "\n\n* " + plato
-            for ingrediente, medidas in ingredientes.items():
+            for ingred, medidas in ingredientes.items():
                 if (medidas[0] == 0 or medidas[0] == ""):
-                    print("\t-", ingrediente + ": Al gusto")
-                    var = var + "\n- " + ingrediente + ": Al gusto"
+                    print("\t-", ingred + ": Al gusto")
+                    var = var + "\n- " + ingred + ": Al gusto"
                 else:
-                    print("\t-", ingrediente + ":", " ".join(map(str, medidas)))
-                    var = var + "\n- " + ingrediente + ": " + " ".join(map(str, medidas))
+                    print("\t-", ingred + ":",
+                          " ".join(map(str, medidas)))
+                    var += "\n- " + ingred + ": " + " ".join(map(str, medidas))
         var = var + "\n\n"
     else:
         print("Error al mostrar recetas")
 
+
 # Función para buscar en cualquiera de los diccionarios
-def search_recipes(filtro, tipo = " "):
+def search_recipes(filtro, tipo=" "):
     global var
     if tipo == " ":
         search_recipes(filtro, dict_comidas)
@@ -73,40 +82,41 @@ def search_recipes(filtro, tipo = " "):
             tipo = dict_cenas
         for plato, ingredientes in tipo.items():
             if plato.upper() == filtro.upper():
-                print("-",plato)
+                print("-", plato)
                 var = var + "\n\n*" + plato
             for ingrediente, medidas in ingredientes.items():
                 if (ingrediente.upper() == filtro.upper()):
                     print("-", plato)
                     var = var + "\n\n*" + plato
 
+
 def load_data():
     cantidad = []
-    ind = 0
     with open("bbdd.txt") as f:
         lists = [line.strip().split(';') for line in f.readlines()]
     for line in lists:
-        if(line[0][0] == "#"): # Se ignora lo que venga en esa línea
+        if(line[0][0] == "#"):  # Se ignora lo que venga en esa línea
             continue
         if(line[0] == "Comida"):
-            com_cen="com"
+            com_cen = "com"
             dict_comidas[line[1]] = {}
         elif(line[0] == "Cena"):
-            com_cen="cen"
+            com_cen = "cen"
             dict_cenas[line[1]] = {}
         ingrs = line[2].strip().split(':')
         for i in range(len(ingrs)):
-            if(i%3 == 0 or i%3==3):
+            if(i % 3 == 0 or i % 3 == 3):
                 ingrediente = ingrs[i]
-            if(i%3 == 1):
+            if(i % 3 == 1):
                 cantidad.append(ingrs[i])
-            if(i%3 == 2):
+            if(i % 3 == 2):
                 cantidad.append(ingrs[i])
                 if(com_cen == "com"):
-                    dict_comidas[line[1]].update({ingrediente:cantidad})
+                    dict_comidas[line[1]].update({ingrediente: cantidad})
                 elif(com_cen == "cen"):
-                    dict_cenas[line[1]].update({ingrediente:cantidad})
+                    dict_cenas[line[1]].update({ingrediente: cantidad})
                 cantidad = []
+
 
 # Función para añadir recetas a mano
 def add_recipes(tipo, diccionario):
@@ -116,14 +126,17 @@ def add_recipes(tipo, diccionario):
     with open("bbdd.txt", "a") as f:
         f.write(tipo+";"+plato+";")
     while 1:
-        ingrediente = input("Introduce ingrediente y pulsa Enter (Si has terminado, pulsa Enter sin escribir nada): ")
+        ingrediente = input("""Introduce ingrediente y pulsa Enter
+        (Si has terminado, pulsa Enter sin escribir nada): """)
         if ingrediente == "":
             break
-        print("Introduce cantidad de %s sin unidad y pulsa Enter (Puede dejarse vacío)" % ingrediente.upper(), end="")
-        cantidad.append(input(": "))
-        cantidad.append(input("Introduce unidad de medida para la cantidad previa (g, ml, kg, ...)(Puede dejarse vacío): "))
+        print("Introduce cantidad de %s sin unidad y pulsa Enter."
+              % ingrediente.upper())
+        cantidad.append(input("(Puede dejarse vacío): "))
+        print("Introduce unidad de medida (g, ml, kg, ...).")
+        cantidad.append(input("(Puede dejarse vacío): "))
 
-        diccionario[plato].update({ingrediente:cantidad})
+        diccionario[plato].update({ingrediente: cantidad})
         with open("bbdd.txt", "a") as f:
             f.write(ingrediente+":"+cantidad[0]+":"+cantidad[1]+":")
         cantidad = []
@@ -133,6 +146,7 @@ def add_recipes(tipo, diccionario):
     with open("bbdd.txt", "a") as f:
         f.write("\n")
     print("Plato añadido")
+
 
 def generate_menu(semanas):
     comid = []
@@ -156,9 +170,10 @@ def generate_menu(semanas):
     saltar = 0
     menu_ok = 0
 
-### Genero menú solo con condiciones de no repetir, y despues compruebo las restricciones. Si están OK pongo menu_ok a 1
+# Genero menú solo con condiciones de no repetir, y despues compruebo
+# las restricciones. Si están OK pongo menu_ok a 1
     for semana in range(semanas):
-        print("Planificando semana",semana+1, "de", semanas)
+        print("Planificando semana", semana+1, "de", semanas)
         while menu_ok == 0:
             comidas_wip = []
             cenas_wip = []
@@ -181,7 +196,8 @@ def generate_menu(semanas):
                     boniato_semana = boniato_semana + 1
                 if "Boniato" in dict_cenas[cena1].keys():
                     boniato_semana = boniato_semana + 1
-                if pescado_semana < 2 and boniato_semana < 2 and comida1 != "Hamburguesa":
+                if (pescado_semana < 2 and boniato_semana < 2
+                   and comida1 != "Hamburguesa"):
                     primera_ok = 1
 
             cenas_wip.append(cena1)
@@ -194,51 +210,77 @@ def generate_menu(semanas):
                     saltar = 1
                 if comida2 in comidas_wip or cena2 in cenas_wip:
                     saltar = 1
-                if "Arroz" in dict_comidas[comida1].keys() and "Arroz" in dict_comidas[comida2].keys(): # No arroz dos comidas consecutivas
-                   saltar = 1
-                if "Boniato" in dict_comidas[comida1].keys() and "Boniato" in dict_comidas[comida2].keys(): # No boniato dos comidas consecutivas
-                   saltar = 1
-                if "Pescado" in dict_comidas[comida1].keys() and "Pescado" in dict_comidas[comida2].keys(): # No pescado dos comidas consecutivas
-                   saltar = 1
-                if "Pescado" in dict_cenas[cena1].keys() and "Pescado" in dict_cenas[cena2].keys(): # No pescado dos cenas consecutivas
-                   saltar = 1
-                if "Pescado" in dict_cenas[cena1].keys() and "Pescado" in dict_comidas[comida2].keys(): # No pescado dos veces consecutivas
-                   saltar = 1
-                if "Pescado" in dict_comidas[comida2].keys() and "Pescado" in dict_cenas[cena2].keys(): # No pescado dos veces consecutivas
-                   saltar = 1
-                if "Patata" in dict_comidas[comida1].keys() and "Patata" in dict_comidas[comida2].keys(): # No patata dos comidas consecutivas
-                   saltar = 1
-                if "Pasta colores" in dict_comidas[comida1].keys() or "Pasta espelta" in dict_comidas[comida1].keys() or "Pasta integral" in dict_comidas[comida1].keys():
-                   if "Pasta colores" in dict_comidas[comida2].keys() or "Pasta espelta" in dict_comidas[comida2].keys() or "Pasta integral" in dict_comidas[comida2].keys(): # No pasta dos comidas consecutivas
-                       saltar = 1
-                if "Pavo" in dict_comidas[comida1].keys() and "Pavo" in dict_comidas[comida2].keys(): # No pavo dos comidas seguidas
-                   saltar = 1
-                if "Pollo" in dict_comidas[comida1].keys() and "Pavo" in dict_comidas[comida2].keys(): # No pollo dos comidas seguidas
-                   saltar = 1
-                if comida2 == "Hamburguesa": # Si ha salido hamburguesa y no es viernes, sábado o domingo no nos vale
+                if ("Arroz" in dict_comidas[comida1].keys()
+                   and "Arroz" in dict_comidas[comida2].keys()):
+                    # No arroz dos comidas consecutivas
+                    saltar = 1
+                if ("Boniato" in dict_comidas[comida1].keys()
+                   and "Boniato" in dict_comidas[comida2].keys()):
+                    # No boniato dos comidas consecutivas
+                    saltar = 1
+                if ("Pescado" in dict_comidas[comida1].keys()
+                   and "Pescado" in dict_comidas[comida2].keys()):
+                    # No pescado dos comidas consecutivas
+                    saltar = 1
+                if ("Pescado" in dict_cenas[cena1].keys()
+                   and "Pescado" in dict_cenas[cena2].keys()):
+                    # No pescado dos cenas consecutivas
+                    saltar = 1
+                if ("Pescado" in dict_cenas[cena1].keys()
+                   and "Pescado" in dict_comidas[comida2].keys()):
+                    # No pescado dos veces consecutivas
+                    saltar = 1
+                if ("Pescado" in dict_comidas[comida2].keys()
+                   and "Pescado" in dict_cenas[cena2].keys()):
+                    # No pescado dos veces consecutivas
+                    saltar = 1
+                if ("Patata" in dict_comidas[comida1].keys()
+                   and "Patata" in dict_comidas[comida2].keys()):
+                    # No patata dos comidas consecutivas
+                    saltar = 1
+                if ("Pasta colores" in dict_comidas[comida1].keys()
+                   or "Pasta espelta" in dict_comidas[comida1].keys()
+                   or "Pasta integral" in dict_comidas[comida1].keys()):
+                    if ("Pasta colores" in dict_comidas[comida2].keys()
+                       or "Pasta espelta" in dict_comidas[comida2].keys()
+                       or "Pasta integral" in dict_comidas[comida2].keys()):
+                        # No pasta dos comidas consecutivas
+                        saltar = 1
+                if ("Pavo" in dict_comidas[comida1].keys()
+                   and "Pavo" in dict_comidas[comida2].keys()):
+                    # No pavo dos comidas seguidas
+                    saltar = 1
+                if ("Pollo" in dict_comidas[comida1].keys()
+                   and "Pavo" in dict_comidas[comida2].keys()):
+                    # No pollo dos comidas seguidas
+                    saltar = 1
+                if comida2 == "Hamburguesa":
+                    # Si ha salido hamburguesa y no es finde no nos vale
                     if (j != 4 and j != 5 and j != 6):
                         saltar = 1
                 if saltar == 0:
-                   comidas_wip.append(comida2)
-                   cenas_wip.append(cena2)
-                   j = j+1
-                   comida1 = comida2
-                   cena1 = cena2
-                   if "Pescado" in dict_comidas[comida2].keys():
-                       pescado_semana = pescado_semana + 1
-                   if "Pescado" in dict_cenas[cena2].keys():
-                       pescado_semana = pescado_semana + 1
-                   if "Boniato" in dict_comidas[comida2].keys():
-                       boniato_semana = boniato_semana + 1
-                   if comida2 == "Hamburguesa":
-                       hamburguesa_semana = hamburguesa_semana + 1
+                    comidas_wip.append(comida2)
+                    cenas_wip.append(cena2)
+                    j = j+1
+                    comida1 = comida2
+                    cena1 = cena2
+                    if "Pescado" in dict_comidas[comida2].keys():
+                        pescado_semana = pescado_semana + 1
+                    if "Pescado" in dict_cenas[cena2].keys():
+                        pescado_semana = pescado_semana + 1
+                    if "Boniato" in dict_comidas[comida2].keys():
+                        boniato_semana = boniato_semana + 1
+                    if comida2 == "Hamburguesa":
+                        hamburguesa_semana = hamburguesa_semana + 1
                 saltar = 0
 
             # Una vez generada una semana chequeo condiciones
-            if pescado_semana <= 2 and pescado_semana >=1 and boniato_semana <= 2 and hamburguesa_semana == 1:
+            if (pescado_semana <= 2 and pescado_semana >= 1
+               and boniato_semana <= 2 and hamburguesa_semana == 1):
                 print("Menu OK")
-                print("Pescado:", pescado_semana, "Boniato:", boniato_semana, "Hamburguesa:", hamburguesa_semana)
-                print("Intentos:",intentos)
+                print("Pescado:", pescado_semana, "Boniato:", boniato_semana,
+                      "Hamburguesa:", hamburguesa_semana)
+                print("Intentos:", intentos)
                 pescado_semana = 0
                 boniato_semana = 0
                 hamburguesa_semana = 0
@@ -248,7 +290,8 @@ def generate_menu(semanas):
                 cenas.extend(cenas_wip)
         menu_ok = 0
 
-    # Esta parte prepara los datos que hay en comidas y cenas para meter saltos de linea y que se vean bien las tablas
+    # Esta parte prepara los datos que hay en comidas y cenas
+    # para meter saltos de linea y que se vean bien las tablas
     sum = 0
     for line in comidas:
         prueb = line.strip().split(' ')
@@ -304,7 +347,8 @@ def generate_menu(semanas):
         in_cen = []
 
     separador = [" ", " ", " ", " ", " ", " ", " "]
-    separador2 = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+    separador2 = ["Lunes", "Martes", "Miércoles", "Jueves",
+                  "Viernes", "Sábado", "Domingo"]
 
     if semanas == 1:
         lunes = [comid[0], i_com[0], separador[0], cen[0], i_cen[0]]
@@ -315,16 +359,32 @@ def generate_menu(semanas):
         sabado = [comid[5], i_com[5], separador[5], cen[5], i_cen[5]]
         domingo = [comid[6], i_com[6], separador[6], cen[6], i_cen[6]]
     elif semanas == 2:
-        lunes = [comid[0], i_com[0], separador[0], cen[0], i_cen[0], separador[0], separador2[0], comid[7], i_com[7], separador[0], cen[7], i_cen[7]]
-        martes = [comid[1], i_com[1], separador[1], cen[1], i_cen[1], separador[1], separador2[1], comid[8], i_com[8], separador[1], cen[8], i_cen[8]]
-        miercoles = [comid[2], i_com[2], separador[2], cen[2], i_cen[2], separador[2], separador2[2], comid[9], i_com[9], separador[2], cen[9], i_cen[9]]
-        jueves = [comid[3], i_com[3], separador[3], cen[3], i_cen[3], separador[3], separador2[3], comid[10], i_com[10], separador[3], cen[10], i_cen[10]]
-        viernes = [comid[4], i_com[4], separador[4], cen[4], i_cen[4], separador[4], separador2[4], comid[11], i_com[11], separador[4], cen[11], i_cen[11]]
-        sabado = [comid[5], i_com[5], separador[5], cen[5], i_cen[5], separador[5], separador2[5], comid[12], i_com[12], separador[5], cen[12], i_cen[12]]
-        domingo = [comid[6], i_com[6], separador[6], cen[6], i_cen[6], separador[6], separador2[6], comid[13], i_com[13], separador[6], cen[13], i_cen[13]]
+        lunes = [comid[0], i_com[0], separador[0], cen[0], i_cen[0],
+                 separador[0], separador2[0], comid[7], i_com[7],
+                 separador[0], cen[7], i_cen[7]]
+        martes = [comid[1], i_com[1], separador[1], cen[1], i_cen[1],
+                  separador[1], separador2[1], comid[8], i_com[8],
+                  separador[1], cen[8], i_cen[8]]
+        miercoles = [comid[2], i_com[2], separador[2], cen[2], i_cen[2],
+                     separador[2], separador2[2], comid[9], i_com[9],
+                     separador[2], cen[9], i_cen[9]]
+        jueves = [comid[3], i_com[3], separador[3], cen[3], i_cen[3],
+                  separador[3], separador2[3], comid[10], i_com[10],
+                  separador[3], cen[10], i_cen[10]]
+        viernes = [comid[4], i_com[4], separador[4], cen[4], i_cen[4],
+                   separador[4], separador2[4], comid[11], i_com[11],
+                   separador[4], cen[11], i_cen[11]]
+        sabado = [comid[5], i_com[5], separador[5], cen[5], i_cen[5],
+                  separador[5], separador2[5], comid[12], i_com[12],
+                  separador[5], cen[12], i_cen[12]]
+        domingo = [comid[6], i_com[6], separador[6], cen[6], i_cen[6],
+                   separador[6], separador2[6], comid[13], i_com[13],
+                   separador[6], cen[13], i_cen[13]]
 
     table = zip(lunes, martes, miercoles, jueves, viernes, sabado, domingo)
-    print(tabulate(table, headers=["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"], tablefmt="fancy_grid"))
+    print(tabulate(table, headers=["Lunes", "Martes", "Miércoles", "Jueves",
+                                   "Viernes", "Sábado", "Domingo"],
+                   tablefmt="fancy_grid"))
 
     # Este módulo crea el PDF con el menú
     doc = SimpleDocTemplate("menu.pdf", pagesize=landscape(A4))
@@ -332,21 +392,24 @@ def generate_menu(semanas):
 
     if semanas == 1:
         data = [separador2, comid, i_com, separador, cen, i_cen]
-        t=Table(data,7*[3.8*cm], [1*cm, 2.6*cm, 4*cm, 0.3*cm, 2.6*cm, 4*cm])
-        t.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'MIDDLE'),
-                            ('ALIGN',(0,0),(-1,-1),'CENTER'),
-                            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
-                            ('BOX', (0,0), (-1,-1), 2, colors.black),
-                            ]))
+        t = Table(data, 7*[3.8*cm], [1*cm, 2.6*cm, 4*cm, 0.3*cm, 2.6*cm, 4*cm])
+        t.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                               ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                               ('INNERGRID', (0, 0), (-1, -1),
+                               0.25, colors.black),
+                               ('BOX', (0, 0), (-1, -1), 2, colors.black)]))
     elif semanas == 2:
-        data = [separador2, comid[:7], i_com[:7], separador, cen[:7], i_cen[:7], separador2, comid[7:], i_com[7:], separador, cen[7:], i_cen[7:]]
-        t=Table(data,7*[3.8*cm], [1*cm, 2.6*cm, 4*cm, 0.3*cm, 2.6*cm, 4*cm, 1*cm, 2.6*cm, 4*cm, 0.3*cm, 2.6*cm, 4*cm])
-        t.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'MIDDLE'),
-                            ('ALIGN',(0,0),(-1,-1),'CENTER'),
-                            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
-                            ('BOX', (0,0), (6,5), 2, colors.black),
-                            ('BOX', (0,6), (-1,-1), 2, colors.black),
-                            ]))
+        data = [separador2, comid[:7], i_com[:7], separador, cen[:7],
+                i_cen[:7], separador2, comid[7:], i_com[7:], separador,
+                cen[7:], i_cen[7:]]
+        t = Table(data, 7*[3.8*cm], [1*cm, 2.6*cm, 4*cm, 0.3*cm, 2.6*cm,
+                  4*cm, 1*cm, 2.6*cm, 4*cm, 0.3*cm, 2.6*cm, 4*cm])
+        t.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                               ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                               ('INNERGRID', (0, 0), (-1, -1),
+                               0.25, colors.black),
+                               ('BOX', (0, 0), (6, 5), 2, colors.black),
+                               ('BOX', (0, 6), (-1, -1), 2, colors.black)]))
 
     elements.append(t)
     doc.build(elements)
@@ -367,7 +430,9 @@ def generate_ingr_list(personas):
                 lista_ingr.append(key)
                 if value[0] != "":
                     if ((value[0] == "0.5") or (value[0] == "1.0")
-                    or (value[0] == "1.5") or (value[0] == "2.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
+                       or (value[0] == "1.5") or (value[0] == "2.0")):
+                        # Un poco chapuza, para los aguacates...
+                        # Puede que haga falta ampliarlo o mejorarlo
                         lista_ingrCant.append(str(personas*float(value[0])))
                     else:
                         lista_ingrCant.append(str(personas*int(value[0])))
@@ -380,29 +445,64 @@ def generate_ingr_list(personas):
                     if i == key:
                         if lista_ingrUd[lista_ingr.index(key)] == value[1]:
                             if lista_ingrCant[lista_ingr.index(key)] != "":
-                                if ((lista_ingrCant[lista_ingr.index(key)] == "0.5") or (lista_ingrCant[lista_ingr.index(key)] == "1.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "1.5") or (lista_ingrCant[lista_ingr.index(key)] == "2.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "2.5") or (lista_ingrCant[lista_ingr.index(key)] == "3.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "3.5") or (lista_ingrCant[lista_ingr.index(key)] == "4.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "4.5") or (lista_ingrCant[lista_ingr.index(key)] == "5.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "5.5") or (lista_ingrCant[lista_ingr.index(key)] == "6.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
-                                    print(lista_ingrCant[lista_ingr.index(key)], value[0])
-                                    lista_ingrCant[lista_ingr.index(key)] = float(lista_ingrCant[lista_ingr.index(key)]) + float(personas)*float(value[0])
-                                    lista_ingrCant[lista_ingr.index(key)] = str(lista_ingrCant[lista_ingr.index(key)])
+                                if ((lista_ingrCant[lista_ingr.index(key)] ==
+                                     "0.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "1.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "1.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "2.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "2.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "3.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "3.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "4.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "4.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "5.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "5.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "6.0")):
+                                    # Un poco chapuza, para los aguacates.
+                                    # Puede que haga falta mejorarlo
+                                    print(lista_ingrCant
+                                          [lista_ingr.index(key)], value[0])
+                                    a = float(lista_ingrCant[lista_ingr.
+                                              index(key)])
+                                    b = float(personas)*float(value[0])
+                                    c = a + b
+                                    lista_ingrCant[lista_ingr.index(key)] = c
+                                    d = str(lista_ingrCant
+                                            [lista_ingr.index(key)])
+                                    lista_ingrCant[lista_ingr.index(key)] = d
                                 else:
-
-                                    lista_ingrCant[lista_ingr.index(key)] = int(lista_ingrCant[lista_ingr.index(key)]) + personas*int(value[0])
-                                    lista_ingrCant[lista_ingr.index(key)] = str(lista_ingrCant[lista_ingr.index(key)])
-                            lista_ingrN[lista_ingr.index(key)] = lista_ingrN[lista_ingr.index(key)] + 1
+                                    a = int(lista_ingrCant
+                                            [lista_ingr.index(key)])
+                                    b = personas*int(value[0])
+                                    c = a + b
+                                    lista_ingrCant[lista_ingr.index(key)] = c
+                                    d = str(lista_ingrCant
+                                            [lista_ingr.index(key)])
+                                    lista_ingrCant[lista_ingr.index(key)] = d
+                            lista_ingrN[lista_ingr.index(key)] += 1
                         else:
-                            print("Error en las unidades de medida, revisar comidas de la bbdd (%s)" % i)
+                            print("Error en las unidades de medida")
+                            print("Revisar comidas de la bbdd (%s)" % i)
     for item in menu_cen:
         for key, value in dict_cenas.get(item).items():
             if key not in lista_ingr:
                 lista_ingr.append(key)
                 if value[0] != "":
                     if ((value[0] == "0.5") or (value[0] == "1.0")
-                    or (value[0] == "1.5") or (value[0] == "2.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
+                       or (value[0] == "1.5") or (value[0] == "2.0")):
+                        # Un poco chapuza, para los aguacates...
+                        # Puede que haga falta ampliarlo o mejorarlo
                         lista_ingrCant.append(str(personas*float(value[0])))
                     else:
                         lista_ingrCant.append(str(personas*int(value[0])))
@@ -415,29 +515,65 @@ def generate_ingr_list(personas):
                     if i == key:
                         if lista_ingrUd[lista_ingr.index(key)] == value[1]:
                             if lista_ingrCant[lista_ingr.index(key)] != "":
-                                if ((lista_ingrCant[lista_ingr.index(key)] == "0.5") or (lista_ingrCant[lista_ingr.index(key)] == "1.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "1.5") or (lista_ingrCant[lista_ingr.index(key)] == "2.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "2.5") or (lista_ingrCant[lista_ingr.index(key)] == "3.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "3.5") or (lista_ingrCant[lista_ingr.index(key)] == "4.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "4.5") or (lista_ingrCant[lista_ingr.index(key)] == "5.0")
-                                or (lista_ingrCant[lista_ingr.index(key)] == "5.5") or (lista_ingrCant[lista_ingr.index(key)] == "6.0")): # Un poco chapuza, para los aguacates... Puede que haga falta ampliarlo o mejorarlo
-                                    lista_ingrCant[lista_ingr.index(key)] = float(lista_ingrCant[lista_ingr.index(key)]) + float(personas)*float(value[0])
-                                    lista_ingrCant[lista_ingr.index(key)] = str(lista_ingrCant[lista_ingr.index(key)])
+                                if ((lista_ingrCant[lista_ingr.index(key)] ==
+                                     "0.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "1.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "1.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "2.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "2.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "3.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "3.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "4.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "4.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "5.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "5.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "6.0")):
+                                    # Un poco chapuza, para los aguacates.
+                                    # Puede que haga falta mejorarlo
+                                    a = float(lista_ingrCant[lista_ingr.
+                                              index(key)])
+                                    b = float(personas)*float(value[0])
+                                    c = a + b
+                                    lista_ingrCant[lista_ingr.index(key)] = c
+                                    d = str(lista_ingrCant
+                                            [lista_ingr.index(key)])
+                                    lista_ingrCant[lista_ingr.index(key)] = d
                                 else:
-                                    lista_ingrCant[lista_ingr.index(key)] = int(lista_ingrCant[lista_ingr.index(key)]) + personas*int(value[0])
-                                    lista_ingrCant[lista_ingr.index(key)] = str(lista_ingrCant[lista_ingr.index(key)])
-                            lista_ingrN[lista_ingr.index(key)] = lista_ingrN[lista_ingr.index(key)] + 1
+                                    a = int(lista_ingrCant
+                                            [lista_ingr.index(key)])
+                                    b = personas*int(value[0])
+                                    c = a + b
+                                    lista_ingrCant[lista_ingr.index(key)] = c
+                                    d = str(lista_ingrCant
+                                            [lista_ingr.index(key)])
+                                    lista_ingrCant[lista_ingr.index(key)] = d
+                            lista_ingrN[lista_ingr.index(key)] += 1
                         else:
-                            print("Error en las unidades de medida, revisar cenas de la bbdd (%s)" % i)
+                            print("Error en las unidades de medida")
+                            print("Revisar cenas de la bbdd (%s)" % i)
 
     c = canvas.Canvas("lista_ingredientes.pdf")
     y = 0
     x = 100
     string = "LISTA DE INGREDIENTES PARA " + str(personas)
-    c.drawString(200,790,string)
+    c.drawString(200, 790, string)
     for item in range(len(lista_ingr)):
-        print(str(lista_ingrN[item])+ "x -  " + lista_ingr[item] + ": " + lista_ingrCant[item] + " " + lista_ingrUd[item])
-        c.drawString(x,750-y,str(lista_ingrN[item])+ "x -  " + lista_ingr[item] + ": " + lista_ingrCant[item] + " " + lista_ingrUd[item])
+        print(str(lista_ingrN[item]) + "x -  " + lista_ingr[item] + ": " +
+              lista_ingrCant[item] + " " + lista_ingrUd[item])
+        c.drawString(x, 750-y, str(lista_ingrN[item]) + "x -  " +
+                     lista_ingr[item] + ": " + lista_ingrCant[item] + " "
+                     + lista_ingrUd[item])
         y = y + 15
         if (750 - y) <= 100:
             x = 350
@@ -484,7 +620,7 @@ def modo_consola():
         elif menu_ppal == 2:
 
             print("Generar lista de ingredientes")
-            personas = int(input("Introduce número de personas para los cálculos: "))
+            personas = int(input("Introduce número de personas: "))
 
             generate_ingr_list(personas)
             input("\nPulsa Enter para volver al menú principal")
@@ -551,7 +687,6 @@ def modo_consola():
             input("Pulsa Enter para volver al menú principal")
 
 
-
 ##################################
 # MENÚ PRINCIPAL EN MODO GRÁFICO #
 ##################################
@@ -563,7 +698,7 @@ class VerticalScrolledFrame:
     except the keyword arguments 'width' and 'height', which
     are passed to the underlying Canvas
     note that a widget layed out in this frame will have Canvas as self.master,
-    if you subclass this there is no built in way for the children to access it.
+    if you subclass it there is no built in way for the children to access it.
     You need to provide the controller separately.
     """
     def __init__(self, master, **kwargs):
@@ -573,7 +708,8 @@ class VerticalScrolledFrame:
 
         self.vsb = Scrollbar(self.outer, orient=VERTICAL)
         self.vsb.pack(fill=Y, side=RIGHT)
-        self.canvas = Canvas(self.outer, highlightthickness=0, width=width, height=height)
+        self.canvas = Canvas(self.outer, highlightthickness=0, width=width,
+                             height=height)
         self.canvas.pack(side=LEFT, fill=BOTH, expand=True)
         self.canvas['yscrollcommand'] = self.vsb.set
         # mouse scroll does not seem to work with just "bind"; You have
@@ -584,7 +720,8 @@ class VerticalScrolledFrame:
         self.vsb['command'] = self.canvas.yview
 
         self.inner = Frame(self.canvas)
-        # pack the inner Frame into the Canvas with the topleft corner 4 pixels offset
+        # pack the inner Frame into the Canvas with the top left corner
+        # 4 pixels offset
         self.canvas.create_window(4, 4, window=self.inner, anchor='nw')
         self.inner.bind("<Configure>", self._on_frame_configure)
 
@@ -592,7 +729,8 @@ class VerticalScrolledFrame:
 
     def __getattr__(self, item):
         if item in self.outer_attr:
-            # geometry attributes etc (eg pack, destroy, tkraise) are passed on to self.outer
+            # geometry attributes etc (eg pack, destroy, tkraise)
+            # are passed on to self.outer
             return getattr(self.outer, item)
         else:
             # all other attributes (_w, children, etc) are passed to self.inner
@@ -601,7 +739,7 @@ class VerticalScrolledFrame:
     def _on_frame_configure(self, event=None):
         x1, y1, x2, y2 = self.canvas.bbox("all")
         height = self.canvas.winfo_height()
-        self.canvas.config(scrollregion = (0,0, x2, max(y2, height)))
+        self.canvas.config(scrollregion=(0, 0, x2, max(y2, height)))
 
     def _bind_mouse(self, event=None):
         self.canvas.bind_all("<4>", self._on_mousewheel)
@@ -616,9 +754,10 @@ class VerticalScrolledFrame:
     def _on_mousewheel(self, event):
         """Linux uses event.num; Windows / Mac uses event.delta"""
         if event.num == 4 or event.delta > 0:
-            self.canvas.yview_scroll(-1, "units" )
+            self.canvas.yview_scroll(-1, "units")
         elif event.num == 5 or event.delta < 0:
-            self.canvas.yview_scroll(1, "units" )
+            self.canvas.yview_scroll(1, "units")
+
 
 class Aplicacion():
 
@@ -627,8 +766,8 @@ class Aplicacion():
         load_data()
 
         self.raiz = Tk()
-        #self.raiz.geometry('600x400')
-        self.raiz.resizable(width=False,height=False)
+        # self.raiz.geometry('600x400')
+        self.raiz.resizable(width=False, height=False)
         self.raiz.title('MenuPlanner')
 
         # DEFINIR BARRA DE MENÚ DE LA APLICACION:
@@ -642,35 +781,46 @@ class Aplicacion():
         barramenu.add_cascade(menu=menuopciones, label='Opciones')
         barramenu.add_cascade(menu=menuayuda, label='Ayuda')
 
-        menuopciones.add_command(label='Ver base de datos', command=self.raiz.destroy, compound=LEFT)
+        menuopciones.add_command(label='Ver base de datos',
+                                 command=self.raiz.destroy, compound=LEFT)
         menuopciones.add_separator()  # Agrega un separador
-        menuopciones.add_command(label='Salir', command=self.raiz.destroy, compound=LEFT)
+        menuopciones.add_command(label='Salir', command=self.raiz.destroy,
+                                 compound=LEFT)
 
-        menuayuda.add_command(label="Acerca de", command=self.f_acerca, compound=LEFT)
+        menuayuda.add_command(label="Acerca de", command=self.f_acerca,
+                              compound=LEFT)
 
-        self.bgenerarmenu = ttk.Button(self.raiz, text='Generar menú', command=self.generarmenu)
-        self.bgenerarlista = ttk.Button(self.raiz, text='Generar lista de ingredientes', command=self.generarlista)
-        self.bshow = ttk.Button(self.raiz, text='Mostrar recetas', command=self.show)
-        self.badd = ttk.Button(self.raiz, text='Añadir recetas', command=self.add)
-        self.bsearch = ttk.Button(self.raiz, text='Buscar', command=self.search)
-        self.bsalir = ttk.Button(self.raiz, text='Salir', command=self.raiz.destroy)
+        self.bgenerarmenu = ttk.Button(self.raiz, text='Generar menú',
+                                       command=self.generarmenu)
+        self.bgenerarlista = ttk.Button(self.raiz,
+                                        text='Generar lista de ingredientes',
+                                        command=self.generarlista)
+        self.bshow = ttk.Button(self.raiz, text='Mostrar recetas',
+                                command=self.show)
+        self.badd = ttk.Button(self.raiz, text='Añadir recetas',
+                               command=self.add)
+        self.bsearch = ttk.Button(self.raiz, text='Buscar',
+                                  command=self.search)
+        self.bsalir = ttk.Button(self.raiz, text='Salir',
+                                 command=self.raiz.destroy)
         self.separador = ttk.Separator()
 
-        self.bgenerarmenu.pack(side=TOP, fill=BOTH, expand=True, padx = 20, pady=20)
-        self.bgenerarlista.pack(side=TOP, fill=BOTH, expand=True, padx = 20, pady=0)
-        self.bshow.pack(side=TOP, fill=BOTH, expand=True, padx = 20, pady=20)
-        self.badd.pack(side=TOP, fill=BOTH, expand=True, padx = 20, pady=0)
-        self.bsearch.pack(side=TOP, fill=BOTH, expand=True, padx = 20, pady=20)
-        self.separador.pack(side=TOP, fill=BOTH, expand=True, padx = 20, pady=0)
-        self.bsalir.pack(side=TOP, fill=BOTH, expand=True, padx = 20, pady=20)
-
+        self.bgenerarmenu.pack(side=TOP, fill=BOTH, expand=True, padx=20,
+                               pady=20)
+        self.bgenerarlista.pack(side=TOP, fill=BOTH, expand=True, padx=20,
+                                pady=0)
+        self.bshow.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=20)
+        self.badd.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=0)
+        self.bsearch.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=20)
+        self.separador.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=0)
+        self.bsalir.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=20)
 
         self.bgenerarmenu.focus_set()
         self.raiz.mainloop()
 
     def generarmenu(self):
 
-        # pequeña función para lanzar la función de generar menú y después una pantalla de OK
+        # Función para lanzar "generar menú" y después una pantalla de OK
         def genmenu():
             generate_menu(self.semanas.get())
             ok = Toplevel()
@@ -687,14 +837,18 @@ class Aplicacion():
             ok.grab_set()
             self.dialogo.wait_window(ok)
 
-        # Muestra una nueva ventana que pide si quieres generar una o dos semanas
+        # Muestra nueva ventana que pide si quieres generar una o dos semanas
         self.dialogo = Toplevel()
-        self.semanas = IntVar(value = 1)
+        self.semanas = IntVar(value=1)
 
-        radiouna = ttk.Radiobutton(self.dialogo, text = 'Una semana', variable = self.semanas, value = 1)
-        radiodos = ttk.Radiobutton(self.dialogo, text = 'Dos semanas', variable = self.semanas, value = 2)
-        botongenerar = ttk.Button(self.dialogo, text='Generar', command = lambda: genmenu())
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar', command=self.dialogo.destroy)
+        radiouna = ttk.Radiobutton(self.dialogo, text='Una semana',
+                                   variable=self.semanas, value=1)
+        radiodos = ttk.Radiobutton(self.dialogo, text='Dos semanas',
+                                   variable=self.semanas, value=2)
+        botongenerar = ttk.Button(self.dialogo, text='Generar',
+                                  command=lambda: genmenu())
+        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
+                                 command=self.dialogo.destroy)
 
         radiouna.pack(side=TOP, padx=20, pady=20)
         radiodos.pack(side=TOP, padx=20, pady=0)
@@ -707,11 +861,10 @@ class Aplicacion():
         self.dialogo.grab_set()
         self.raiz.wait_window(self.dialogo)
 
-
-
     def generarlista(self):
 
-        # pequeña función para lanzar la función de generar lista de ingredientes y después una pantalla de OK
+        # Función para lanzar "generar lista de ingredientes"
+        # y después una pantalla de OK
         def genlista():
             generate_ingr_list(self.personas.get())
             ok = Toplevel()
@@ -728,16 +881,18 @@ class Aplicacion():
             ok.grab_set()
             self.dialogo.wait_window(ok)
 
-
-        # Muestra una nueva ventana que pide si quieres generar lista para una o dos personas
+        # Muestra una nueva ventana que pide si quieres para una o dos personas
         self.dialogo = Toplevel()
-        self.personas = IntVar(value = 1)
+        self.personas = IntVar(value=1)
 
-
-        radiouna = ttk.Radiobutton(self.dialogo, text = 'Una persona', variable = self.personas, value = 1)
-        radiodos = ttk.Radiobutton(self.dialogo, text = 'Dos personas', variable = self.personas, value = 2)
-        botongenerar = ttk.Button(self.dialogo, text='Generar', command = lambda: genlista())
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar', command=self.dialogo.destroy)
+        radiouna = ttk.Radiobutton(self.dialogo, text='Una persona',
+                                   variable=self.personas, value=1)
+        radiodos = ttk.Radiobutton(self.dialogo, text='Dos personas',
+                                   variable=self.personas, value=2)
+        botongenerar = ttk.Button(self.dialogo, text='Generar',
+                                  command=lambda: genlista())
+        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
+                                 command=self.dialogo.destroy)
 
         radiouna.pack(side=TOP, padx=20, pady=20)
         radiodos.pack(side=TOP, padx=20, pady=0)
@@ -750,7 +905,8 @@ class Aplicacion():
 
     def show(self):
 
-        # pequeña función para lanzar la función de mostrar recetas en una nueva ventana con un scrollbar vertical
+        # Función para lanzar "mostrar recetas" en una nueva ventana
+        # con un scrollbar vertical
         def muestrarecetas():
             global var
             var = ""
@@ -759,9 +915,9 @@ class Aplicacion():
             ok = Toplevel()
 
             frame = VerticalScrolledFrame(ok, width=470, relief=SUNKEN)
-            frame.pack(fill=BOTH, expand=True) # fill window
+            frame.pack(fill=BOTH, expand=True)  # fill window
 
-            label = Label(frame, text = var)
+            label = Label(frame, text=var)
             label.grid(column=1, row=1, sticky=W)
 
             ok.transient(master=self.dialogo)
@@ -770,14 +926,17 @@ class Aplicacion():
 
         # Muestra una nueva ventana que pide si quieres ver comidas o cenas
         self.dialogo = Toplevel()
-        self.tipo = StringVar(value = "comida")
+        self.tipo = StringVar(value="comida")
         self.txt = StringVar()
 
-
-        radiocomidas = ttk.Radiobutton(self.dialogo, text = 'Comidas', variable = self.tipo, value = "comida")
-        radiocenas = ttk.Radiobutton(self.dialogo, text = 'Cenas', variable = self.tipo, value = "cena")
-        botonmostrar = ttk.Button(self.dialogo, text='Mostrar', command = lambda: muestrarecetas())
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar', command=self.dialogo.destroy)
+        radiocomidas = ttk.Radiobutton(self.dialogo, text='Comidas',
+                                       variable=self.tipo, value="comida")
+        radiocenas = ttk.Radiobutton(self.dialogo, text='Cenas',
+                                     variable=self.tipo, value="cena")
+        botonmostrar = ttk.Button(self.dialogo, text='Mostrar',
+                                  command=lambda: muestrarecetas())
+        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
+                                 command=self.dialogo.destroy)
 
         radiocomidas.pack(side=TOP, padx=20, pady=20)
         radiocenas.pack(side=TOP, padx=20, pady=0)
@@ -792,13 +951,16 @@ class Aplicacion():
 
         # Muestra una nueva ventana que pide si quieres añadir comidas o cenas
         self.dialogo = Toplevel()
-        self.tipo = IntVar(value = 1)
+        self.tipo = IntVar(value=1)
 
-
-        radiocomidas = ttk.Radiobutton(self.dialogo, text = 'Comidas', variable = self.tipo, value = 1)
-        radiocenas = ttk.Radiobutton(self.dialogo, text = 'Cenas', variable = self.tipo, value = 2)
-        botonanadir = ttk.Button(self.dialogo, text='Añadir', command=self.dialogo.destroy)
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar', command=self.dialogo.destroy)
+        radiocomidas = ttk.Radiobutton(self.dialogo, text='Comidas',
+                                       variable=self.tipo, value=1)
+        radiocenas = ttk.Radiobutton(self.dialogo, text='Cenas',
+                                     variable=self.tipo, value=2)
+        botonanadir = ttk.Button(self.dialogo, text='Añadir',
+                                 command=self.dialogo.destroy)
+        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
+                                 command=self.dialogo.destroy)
 
         radiocomidas.pack(side=TOP, padx=20, pady=20)
         radiocenas.pack(side=TOP, padx=20, pady=0)
@@ -811,7 +973,8 @@ class Aplicacion():
 
     def search(self):
 
-        # pequeña función para lanzar la función de buscar recetas en una nueva ventana con un scrollbar vertical
+        # Función para lanzar "buscar recetas" en una nueva ventana
+        # con un scrollbar vertical
         def buscarecetas():
             global var
             var = ""
@@ -820,27 +983,34 @@ class Aplicacion():
             ok = Toplevel()
 
             frame = VerticalScrolledFrame(ok, width=470, relief=SUNKEN)
-            frame.pack(fill=BOTH, expand=True) # fill window
+            frame.pack(fill=BOTH, expand=True)  # fill window
 
-            label = Label(frame, text = var)
+            label = Label(frame, text=var)
             label.grid(column=1, row=1, sticky=W)
 
             ok.transient(master=self.dialogo)
             ok.grab_set()
             self.dialogo.wait_window(ok)
 
-        # Muestra una nueva ventana que pide si quieres buscar en comidas, cenas o ambas
+        # Muestra una nueva ventana que pide si quieres buscar
+        # en comidas, cenas o ambas
         self.dialogo = Toplevel()
-        self.tipo = StringVar(value = "comida")
+        self.tipo = StringVar(value="comida")
         self.busq = StringVar()
 
         labelbusqueda = ttk.Label(self.dialogo, text="Comida o ingrediente:")
-        entrybusqueda = ttk.Entry(self.dialogo, textvariable=self.busq, width=25)
-        radiocomidas = ttk.Radiobutton(self.dialogo, text = 'Comidas', variable = self.tipo, value = "comida")
-        radiocenas = ttk.Radiobutton(self.dialogo, text = 'Cenas', variable = self.tipo, value = "cena")
-        radioambas = ttk.Radiobutton(self.dialogo, text = 'Ambas', variable = self.tipo, value = " ")
-        botonbuscar = ttk.Button(self.dialogo, text='Buscar', command = lambda: buscarecetas())
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar', command=self.dialogo.destroy)
+        entrybusqueda = ttk.Entry(self.dialogo, textvariable=self.busq,
+                                  width=25)
+        radiocomidas = ttk.Radiobutton(self.dialogo, text='Comidas',
+                                       variable=self.tipo, value="comida")
+        radiocenas = ttk.Radiobutton(self.dialogo, text='Cenas',
+                                     variable=self.tipo, value="cena")
+        radioambas = ttk.Radiobutton(self.dialogo, text='Ambas',
+                                     variable=self.tipo, value=" ")
+        botonbuscar = ttk.Button(self.dialogo, text='Buscar',
+                                 command=lambda: buscarecetas())
+        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
+                                 command=self.dialogo.destroy)
 
         labelbusqueda.pack(side=TOP, padx=20, pady=20)
         entrybusqueda.pack(side=TOP, padx=20, pady=0)
@@ -857,7 +1027,6 @@ class Aplicacion():
     def f_acerca(self):
 
         acerca = Toplevel()
-        #acerca.geometry("320x200")
         acerca.resizable(width=False, height=False)
         acerca.title("Acerca de")
         marco1 = ttk.Frame(acerca, padding=(10, 10, 10, 10),
@@ -877,14 +1046,14 @@ class Aplicacion():
         self.raiz.wait_window(acerca)
 
 
-
 def main():
 
-    if modo_grafico == True:
-        mi_app = Aplicacion()
+    if modo_grafico is True:
+        Aplicacion()
     else:
         modo_consola()
     return 0
+
 
 if __name__ == '__main__':
     main()
