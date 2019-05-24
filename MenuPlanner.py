@@ -7,8 +7,8 @@
 
 __author__ = 'Marcos Pérez Martín'
 __title__ = 'MenuPlanner'
-__date__ = '2019'
-__version__ = '1.3'
+__date__ = '24/05/2019'
+__version__ = '1.3.1'
 
 from tkinter import Frame, Scrollbar, VERTICAL, Y, RIGHT, Canvas, LEFT, BOTH
 from tkinter import Widget, Tk, Menu, TOP, Toplevel, RAISED, Label, Button
@@ -473,23 +473,22 @@ def generate_ingr_list(personas):
                                     # Puede que haga falta mejorarlo
                                     print(lista_ingrCant
                                           [lista_ingr.index(key)], value[0])
-                                    a = float(lista_ingrCant[lista_ingr.
-                                              index(key)])
-                                    b = float(personas)*float(value[0])
-                                    c = a + b
-                                    lista_ingrCant[lista_ingr.index(key)] = c
-                                    d = str(lista_ingrCant
+                                    lista_ingrCant[lista_ingr.index(key)] = (
+                                        float(lista_ingrCant
+                                              [lista_ingr.index(key)]) +
+                                        float(personas)*float(value[0]))
+                                    lista_ingrCant[lista_ingr.index(key)] = (
+                                        str(lista_ingrCant
                                             [lista_ingr.index(key)])
-                                    lista_ingrCant[lista_ingr.index(key)] = d
+                                    )
                                 else:
-                                    a = int(lista_ingrCant
-                                            [lista_ingr.index(key)])
-                                    b = personas*int(value[0])
-                                    c = a + b
-                                    lista_ingrCant[lista_ingr.index(key)] = c
-                                    d = str(lista_ingrCant
-                                            [lista_ingr.index(key)])
-                                    lista_ingrCant[lista_ingr.index(key)] = d
+                                    lista_ingrCant[lista_ingr.index(key)] = (
+                                        int(lista_ingrCant
+                                            [lista_ingr.index(key)]) +
+                                        personas*int(value[0]))
+                                    lista_ingrCant[lista_ingr.index(key)] = (
+                                        str(lista_ingrCant
+                                            [lista_ingr.index(key)]))
                             lista_ingrN[lista_ingr.index(key)] += 1
                         else:
                             print("Error en las unidades de medida")
