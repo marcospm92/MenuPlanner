@@ -28,8 +28,13 @@ Comida;Ensalada de boniato. Pavo;Boniato:140:g:Lechuga:::Zanahoria:::Tomate:::Pa
 Comida;Quinoa con berenjena y sepia;Quinoa:120:g:Berenjena:::Tomate tami.:2:cuch.:Sepia:120:g
 Comida;Arroz con queso fresco y palitos de cangrejo. Muslos de pollo;Arroz:120:g:Queso fresco:1::Palitos cangrejo:2::Pepino:::Muslos pollo:2:
 Comida;Patata al horno con verduras y ternera;Patata:160:g:Verdura:::Ternera:120:g
+Comida;Ensalada de pasta con palmitos y pollo;Pasta colores:120:g:Palmitos:::Fruta:1::Aguacate:0.5::Hummus:60:g:Pollo:120:g
+Comida;Pasta con carne picada, huevo y verdura;Pasta integral:120:g:Tomate tami.:2:cuch.:Carne Picada:100:g:Huevo:1::Verdura::
+Comida;Burger, berenjena, patata y cebolla;Patata:160:g:Cebolla:::Burger:120:g:Berenjena:::
+Comida;Ensalada de quinoa y pescado;Quinoa:120:g:Aguacate:0.5::Espárragos bl.:::Palitos cangrejo:2::Hummus:60:g:Pescado:140:g
+Comida;Guisantes, judías verdes, tofu y queso cottage;Guisantes:140:g:Judías verdes:::Tofu:100:g:Queso Cottage:60:g
 Cena;Ensalada de salmón ahumado;Lechuga:::Aguacate:0.5::Salmón ahum.:130:g:Tomates cherry:::Aceitunas negras:5::Pepino::
-#Cena;Gazpacho, verdura, gambitas y burger vegetal;Gazpacho:250:ml:Verdura:::Gambitas:40:g:Burger veget.:120:g
+Cena;Gazpacho, verdura, gambitas y burger vegetal;Gazpacho:250:ml:Verdura:::Gambitas:40:g:Burger veget.:120:g
 Cena;Ensalada de canónigos, lechuga y tofu;Canónigos:::Lechuga:::Frutos secos:15:g:Tofu:120:g:Tomate:::Aceitunas negras:4::Fruta:1:
 Cena;Tortilla de pavo y brócoli;Huevo:1::Claras:100:ml:Lonchas pavo:40:g:Especias:::Brócoli::
 Cena;Sepia, verdura y aguacate;Sepia:130:g:Verdura:::Aguacate:0.5:
@@ -44,7 +49,7 @@ Cena;Ensalada con hummus, salmón y fruta;Lechuga:::Tomates cherry:::Salmón ahu
 Cena;Ensalada de palitos de cangrejo;Lechuga:::Palitos cangrejo:2::Huevo:2::Zanahoria:::Fruta:1::Tomate::
 Cena;Verdura, burger y queso crema;Verdura:::Burger:120:g:Queso crema:40:g
 Cena;Gazpacho, verdura y burger vegetal;Gazpacho:250:ml:Verdura:::Burger veget.:120:g
-Cena;Ensalada de remolacha, huevo cocido, caballa y fruta;Lechuga:::Fruta:::Caballa:100:g:Huevo:1::Remolacha::
+Cena;Ensalada de remolacha, huevo cocido, caballa y fruta;Lechuga:::Fruta:1::Caballa:100:g:Huevo:1::Remolacha::
 Cena;Ensalada de endivias, queso cottage, pollo, espárragos y palmitos;Endivias:::Queso Cottage:50:g:Pollo:100:g:Espárragos bl.:::Palmitos:::Tomates cherry::
 Cena;Salteado de pimientos y champiñones. Pavo y aguacate;Pimiento:::Champiñones:::Pavo:120:g:Aguacate:0.5:
 Cena;Pescado, verdura y frutos secos;Pescado:140:g:Verdura:::Frutos secos:15:g
