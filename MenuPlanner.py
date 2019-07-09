@@ -511,6 +511,7 @@ def generate_ingr_list(personas):
                 lista_ingrN.append(1)
             else:
                 for i in lista_ingr:
+                    print(i)
                     if i == key:
                         if lista_ingrUd[lista_ingr.index(key)] == value[1]:
                             if lista_ingrCant[lista_ingr.index(key)] != "":
@@ -537,7 +538,21 @@ def generate_ingr_list(personas):
                                     (lista_ingrCant[lista_ingr.index(key)] ==
                                      "5.5") or
                                     (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "6.0")):
+                                     "6.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "6.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "7.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "7.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "8.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "8.5") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "9.0") or
+                                    (lista_ingrCant[lista_ingr.index(key)] ==
+                                     "9.5")):
                                     # Un poco chapuza, para los aguacates.
                                     # Puede que haga falta mejorarlo
                                     a = float(lista_ingrCant[lista_ingr.

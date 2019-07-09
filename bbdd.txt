@@ -5,7 +5,7 @@ Comida;Muslos de pollo con boniato;Boniato:180:g:Muslos pollo:2::Cebolla:::Tomat
 Comida;Patata al horno con verdura y burger vegetal;Patata:160:g:Verdura:::Burger veget.:120:g
 Comida;Ensalada de arroz y quinoa;Arroz:60:g:Quinoa:60:g:Zanahoria:::Tomate:::Aceitunas negras:5::Aguacate:0.5::Semillas::
 Comida;Pasta de colores con cangrejo y lechuga. Pescado;Pasta colores:120:g:Palitos cangrejo:2::Pescado:120:g:Lechuga::
-Comida;Pasta de espelta con champiñones y tortilla;Pasta espelta:120:g:Champiñones:::Pimiento:::Huevo:1::Clara huevo:80:ml:Especias::
+Comida;Pasta de espelta con champiñones y tortilla;Pasta espelta:120:g:Champiñones:::Pimiento:::Huevo:1::Claras:80:ml:Especias::
 Comida;Arroz con verduras y pollo;Arroz:120:g:Verdura:::Pollo:120:g
 Comida;Arroz con berenjena y tofu;Arroz:120:g:Berenjena:::Pimiento:::Frutos secos:15:g:Tofu:100:g
 Comida;Pasta de espelta con verdura y burger;Pasta espelta:120:g:Verdura:::Burger:120:g:
@@ -33,8 +33,11 @@ Comida;Pasta con carne picada, huevo y verdura;Pasta integral:120:g:Tomate tami.
 Comida;Burger, berenjena, patata y cebolla;Patata:160:g:Cebolla:::Burger:120:g:Berenjena:::
 Comida;Ensalada de quinoa y pescado;Quinoa:120:g:Aguacate:0.5::Espárragos bl.:::Palitos cangrejo:2::Hummus:60:g:Pescado:140:g
 Comida;Guisantes, judías verdes, tofu y queso cottage;Guisantes:140:g:Judías verdes:::Tofu:100:g:Queso Cottage:60:g
+Comida;Pollo con brócoli, boniato y aguacate;Boniato:160:g:Brócoli:::Cebolla:::Aguacate:0.5::Pollo:120:g
+Comida;Ensalada de quinoa y tortilla;Quinoa:120:g:Zanahoria:::Pepino:::Frutos secos:15:g:Huevo:1::Claras:130:ml
+Comida;Lomo, patata, verdura y aguacate;Lomo:120:g:Patata:160:g:Verdura:::Aguacate:0.5::
 Cena;Ensalada de salmón ahumado;Lechuga:::Aguacate:0.5::Salmón ahum.:130:g:Tomates cherry:::Aceitunas negras:5::Pepino::
-Cena;Gazpacho, verdura, gambitas y burger vegetal;Gazpacho:250:ml:Verdura:::Gambitas:40:g:Burger veget.:120:g
+#Cena;Gazpacho, verdura, gambitas y burger vegetal;Gazpacho:250:ml:Verdura:::Gambitas:40:g:Burger veget.:120:g
 Cena;Ensalada de canónigos, lechuga y tofu;Canónigos:::Lechuga:::Frutos secos:15:g:Tofu:120:g:Tomate:::Aceitunas negras:4::Fruta:1:
 Cena;Tortilla de pavo y brócoli;Huevo:1::Claras:100:ml:Lonchas pavo:40:g:Especias:::Brócoli::
 Cena;Sepia, verdura y aguacate;Sepia:130:g:Verdura:::Aguacate:0.5:
@@ -42,14 +45,18 @@ Cena;Verdura, aguacate y burger;Verdura:::Aguacate:0.5::Burger:120:g
 Cena;Burger vegetal, champiñones, espárragos y queso crema;Burger veget.:120:g:Champiñones:250:g:Espárragos tr.:::Queso crema:50:g
 Cena;Fajita fit;Huevo:1::Claras:50:ml:Copos avena:20:g:Especias:::Pollo:80:g:Champiñones:::Cebolla:::Pimiento::
 Cena;Ensalada de queso fresco, salmón y manzana;Lechuga:::Tomate:::Queso fresco:1::Salmón ahum.:130:g:Pepino:::Manzana:1:
-Cena;Revuelto de huevo y verdura;Huevo:1::Claras:100:ml:Verdura::
+#Cena;Revuelto de huevo y verdura;Huevo:1::Claras:100:ml:Verdura::
 Cena;Pescado y verdura;Verdura:::Pescado:120:g
 Cena;Revuelto de huevo, gambitas y champiñones. Verdura;Huevo:1::Claras:100:ml:Gambitas:30:g:Champiñones:::Especias:::Verdura::
 Cena;Ensalada con hummus, salmón y fruta;Lechuga:::Tomates cherry:::Salmón ahum.:120:g:Hummus:60:g:Pepino:::Fruta:1:
 Cena;Ensalada de palitos de cangrejo;Lechuga:::Palitos cangrejo:2::Huevo:2::Zanahoria:::Fruta:1::Tomate::
 Cena;Verdura, burger y queso crema;Verdura:::Burger:120:g:Queso crema:40:g
-Cena;Gazpacho, verdura y burger vegetal;Gazpacho:250:ml:Verdura:::Burger veget.:120:g
+Cena;Gazpacho, verdura, burger y aguacate;Gazpacho:250:ml:Verdura:::Burger:120:g:Aguacate:0.5:
 Cena;Ensalada de remolacha, huevo cocido, caballa y fruta;Lechuga:::Fruta:1::Caballa:100:g:Huevo:1::Remolacha::
 Cena;Ensalada de endivias, queso cottage, pollo, espárragos y palmitos;Endivias:::Queso Cottage:50:g:Pollo:100:g:Espárragos bl.:::Palmitos:::Tomates cherry::
 Cena;Salteado de pimientos y champiñones. Pavo y aguacate;Pimiento:::Champiñones:::Pavo:120:g:Aguacate:0.5:
 Cena;Pescado, verdura y frutos secos;Pescado:140:g:Verdura:::Frutos secos:15:g
+Cena;Pizza-tortilla;Huevo:1::Claras:80:ml:Especias:::Tomate tami.:2:cuch.:Queso crema:30:g:Tomates cherry:::Atún:1:lata
+Cena;Ensalada con anacardos, atún y hummus;Canonigos:::Tomates:::Aguacate:0.5::Anacardos:10:g:Atún:2:latas:Hummus:40:g
+Cena;Salteado de brócoli, tomate y champiñones. Pescado;Brócoli:::Tomates cherry:::Champiñones:::Pescado:140:g
+Cena;Ensalada con pollo, melón y nueces;Lechuga:::Zanahoria:::Pollo:120:g:Melón:1::Nueces:10:g
