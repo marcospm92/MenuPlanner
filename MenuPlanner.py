@@ -7,13 +7,9 @@
 
 __author__ = 'Marcos Pérez Martín'
 __title__ = 'MenuPlanner'
-__date__ = '24/05/2019'
-__version__ = '1.3.1'
+__date__ = '21/10/2019'
+__version__ = '2.0.1'
 
-from tkinter import Frame, Scrollbar, VERTICAL, Y, RIGHT, Canvas, LEFT, BOTH
-from tkinter import Widget, Tk, Menu, TOP, Toplevel, RAISED, Label, Button
-from tkinter import IntVar, SUNKEN, W, StringVar
-from tkinter import ttk
 import time
 import os
 import sys
@@ -25,130 +21,567 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.pdfgen import canvas
 
+from MenuPlanner_ui import QtWidgets, Ui_MainWindow
+from SearchDialog_ui import Ui_Dialog as Ui_Dialog_Search
+from AddRecipeDialog_ui import Ui_Dialog as Ui_Dialog_AddRecipe
+from AddIngredientDialog_ui import Ui_Dialog as Ui_Dialog_AddIngredient
+from ConfirmRecipeDialog_ui import Ui_Dialog as Ui_Dialog_ConfirmRecipe
+from SettingsDialog_ui import Ui_Dialog as Ui_Dialog_Settings
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+
+# Ver si alguna de estas no hace falta para el funcionamiento
 dict_comidas = {}
 dict_cenas = {}
-modo_grafico = False
 comidas = []
 cenas = []
 menu_com = []
 menu_cen = []
-var = ""
+lista_cant = []
+lista_ingredientes = []
+receta = ""
+
+OK = 0
+ERROR = -1
 
 
-def clear():
-    SO = sys.platform
-    if SO == "linux":
-        os.system('clear')
-    elif SO == "win64" or SO == "win32":
-        os.system('cls')
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    """ Clase que controla la ventana principal de la aplicación y sus
+    funciones.
+
+    Arguments:
+        QtWidgets.QMainWindow {} -- Objeto de tipo QMainWindow de QT
+        Ui_MainWindow {} -- Interfaz de la ventana principal
+    """
+    def __init__(self, *args, **kwargs):
+        """ Inicializa todo lo necesario para la interfaz gráfica.
+        """
+        QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
+        self.setupUi(self)
+        self.setWindowTitle("MenuPlanner")
+        self.label.setText("MenuPlanner")
+        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setStyleSheet("font: 30pt Comic Sans MS")
+
+        self.pushButton.setText("Generar Menú")
+        self.pushButton_2.setText("Generar Lista de Ingredientes")
+        self.pushButton_3.setText("Buscar Recetas")
+        self.pushButton_4.setText("Añadir Recetas")
+        self.pushButton_5.setText("Ajustes")
+        self.pushButton_6.setText("Salir")
+
+        # Conectamos eventos con acciones
+        self.pushButton.clicked.connect(generarmenu)
+        self.pushButton_2.clicked.connect(generarlista)
+        self.pushButton_3.clicked.connect(buscarrecetas)
+        self.pushButton_4.clicked.connect(anadirrecetas)
+        self.pushButton_5.clicked.connect(ajustes)
+        self.pushButton_6.clicked.connect(exit)
+
+
+class SearchDialog(QtWidgets.QDialog, Ui_Dialog_Search):
+
+    def __init__(self, *args, **kwargs):
+        super(SearchDialog, self).__init__(*args, **kwargs)
+        self.setupUi(self)
+
+        self.setWindowTitle("Mostrar Recetas")
+
+        self.label.setText("Mostrar:")
+        self.comboBox.addItem("Comidas")
+        self.comboBox.addItem("Cenas")
+        self.comboBox.addItem("Ambos")
+
+        self.radioButton.setText("Mostrar todas")
+        self.radioButton_2.setText("Filtrar")
+        self.radioButton.setChecked(True)
+
+        self.label_2.setText("Ingrediente:")
+        self.label_2.setEnabled(False)
+        for item in sorted(set(lista_ingredientes)):
+            self.comboBox_2.addItem(item)
+        self.comboBox_2.setEnabled(False)
+
+        self.radioButton.toggled.connect(self.no_filter)
+        self.radioButton_2.toggled.connect(self.filter)
+
+    def no_filter(self):
+        self.label_2.setEnabled(False)
+        self.comboBox_2.setEnabled(False)
+
+    def filter(self):
+        self.label_2.setEnabled(True)
+        self.comboBox_2.setEnabled(True)
+
+
+class AddRecipeDialog(QtWidgets.QDialog, Ui_Dialog_AddRecipe):
+
+    def __init__(self, *args, **kwargs):
+        super(AddRecipeDialog, self).__init__(*args, **kwargs)
+        self.setupUi(self)
+
+        self.setWindowTitle("Añadir Receta")
+
+        self.label.setText("Nombre:")
+        self.lineEdit.setFocus()
+        self.label_2.setText("Añadir a:")
+        self.comboBox.addItem("Comidas")
+        self.comboBox.addItem("Cenas")
+
+    def accept(self):
+        global receta
+        global receta_orig
+
+        if len(self.lineEdit.text()) <= 3:
+            print("Error en la longitud del nombre, " +
+                  str(len(self.lineEdit.text())) + " caracteres introducidos")
+            self.label.setStyleSheet("color: red;")
+            self.lineEdit.setStyleSheet("border: 1.5px solid red;")
+            alert = QMessageBox()
+            alert.setWindowTitle("Añadir Receta")
+            alert.setIcon(QMessageBox.Critical)
+            alert.setStandardButtons(QMessageBox.Ok)
+            alert.setText("El nombre es demasiado corto")
+            alert.exec_()
+        else:
+            print("Se va a añadir " + self.lineEdit.text() + " a " +
+                  self.comboBox.currentText())
+            receta = self.comboBox.currentText()[0:-1] + ";"
+            receta = receta + self.lineEdit.text() + ";"
+            print(receta)
+            receta_orig = receta
+            diag = AddIngredientDialog()
+            result = diag.exec_()
+            if result == OK:
+                alert = QMessageBox()
+                alert.setWindowTitle("Receta Añadida")
+                alert.setIcon(QMessageBox.Information)
+                alert.setStandardButtons(QMessageBox.Ok)
+                alert.setText("Receta añadida correctamente")
+                alert.exec_()
+                print("Salgo OK de Añadir Receta")
+                self.done(OK)
+            else:
+                print("Salgo KO de Añadir Receta")
+
+
+class AddIngredientDialog(QtWidgets.QDialog, Ui_Dialog_AddIngredient):
+
+    def __init__(self, *args, **kwargs):
+        super(AddIngredientDialog, self).__init__(*args, **kwargs)
+        self.setupUi(self)
+        self.setWindowTitle("Añadir Ingrediente")
+
+        self.label.setText("Nombre:")
+        for item in sorted(set(lista_ingredientes)):
+            self.comboBox.addItem(item)
+        self.comboBox.addItem("Otro - Indicar abajo")
+        self.lineEdit.setDisabled(True)
+
+        self.label_2.setText("Cantidad:")
+        for item in sorted(lista_cant_tipicas.strip('][ ').split(', ')):
+            self.comboBox_2.addItem(item[1:-1])
+        self.comboBox_2.addItem("Otro - Indicar abajo")
+        self.lineEdit_2.setDisabled(True)
+
+        self.label_3.setText("Unidad de medida:")
+        for item in sorted(lista_medidas.strip('][ ').split(', ')):
+            self.comboBox_3.addItem(item[1:-1])
+        self.comboBox_3.addItem("Otro - Indicar abajo")
+        self.lineEdit_3.setDisabled(True)
+
+        self.checkBox.setText("Último ingrediente a añadir")
+
+        self.comboBox.currentIndexChanged.connect(self.on_combobox_change)
+        self.comboBox_2.currentIndexChanged.connect(self.on_combobox_2_change)
+        self.comboBox_3.currentIndexChanged.connect(self.on_combobox_3_change)
+
+    def on_combobox_change(self, new_index):
+        if new_index == len(self.comboBox) - 1:  # "Otro" es la última opción
+            self.lineEdit.setDisabled(False)
+        else:
+            self.lineEdit.setDisabled(True)
+
+    def on_combobox_2_change(self, new_index):
+        if new_index == len(self.comboBox_2) - 1:  # "Otro" es la última opción
+            self.lineEdit_2.setDisabled(False)
+        else:
+            self.lineEdit_2.setDisabled(True)
+
+    def on_combobox_3_change(self, new_index):
+        if new_index == len(self.comboBox_3) - 1:  # "Otro" es la última opción
+            self.lineEdit_3.setDisabled(False)
+        else:
+            self.lineEdit_3.setDisabled(True)
+
+    def accept(self):  # Si pongo otro no me debe dejar ponerlo en blanco
+        global receta
+        global receta_orig
+        if self.comboBox.currentIndex() == len(self.comboBox) - 1:
+            if self.lineEdit.text() != "":
+                text_ingr = self.lineEdit.text()
+            else:
+                print("Error en ingrediente escrito")
+        else:
+            text_ingr = self.comboBox.currentText()
+
+        if self.comboBox_2.currentIndex() == len(self.comboBox_2) - 1:
+            if self.lineEdit_2.text() != "":
+                text_cant = self.lineEdit_2.text()
+            else:
+                print("Error en cantidad escrita")
+        else:
+            text_cant = self.comboBox_2.currentText()
+
+        if self.comboBox_3.currentIndex() == len(self.comboBox_3) - 1:
+            if self.lineEdit_3.text() != "":
+                text_uds = self.lineEdit_3.text()
+            else:
+                print("Error en unidades escritas")
+        else:
+            text_uds = self.comboBox_3.currentText()
+
+        print("Ingrediente: " + text_ingr + ". Cantidad: " +
+              text_cant + ". Unidades de medida: " + text_uds + ".")
+
+        receta = receta + text_ingr + ":" + text_cant + ":" + text_uds
+
+        alert = QMessageBox()
+        alert.setWindowTitle("Ingrediente añadido")
+        alert.setIcon(QMessageBox.Information)
+        alert.setStandardButtons(QMessageBox.Ok)
+        alert.setText("Ingrediente añadido correctamente")
+        alert.exec_()
+
+        if self.checkBox.isChecked():
+            print("CheckBox Último Ingrediente marcado")
+            diag = ConfirmRecipeDialog()
+            result = diag.exec_()
+            if result == OK:
+                print("Salgo OK")
+                self.done(OK)
+            else:
+                print("Salgo KO")
+            # Cierro y me voy al principal, ya he terminado
+        else:
+            receta = receta + ":"
+        print(receta)
+
+
+class ConfirmRecipeDialog(QtWidgets.QDialog, Ui_Dialog_ConfirmRecipe):
+
+    def __init__(self, *args, **kwargs):
+        global receta
+        global receta_orig
+        super(ConfirmRecipeDialog, self).__init__(*args, **kwargs)
+        self.setupUi(self)
+
+        self.setWindowTitle("Confirmar Receta")
+
+        texto = ""
+        receta_list = receta.split(";")
+        ingr_list = receta_list[2].split(":")
+        for item in ingr_list:
+            if ingr_list.index(item) % 3 == 0:
+                texto = texto + "\n"
+            texto = texto + item + " "
+        texto = texto + "\n"
+        self.label.setText("¿Es correcta la receta?\n\n" + receta_list[0] +
+                           ": " + receta_list[1] + "\n" + texto)
+
+    def accept(self):
+        print("Hace click en Aceptar")
+        print(receta)
+        self.done(OK)
+
+    def reject(self):
+        global receta
+        global receta_orig
+        print("Hace click en Cancelar")
+        receta = receta_orig
+        self.done(ERROR)
+
+
+class SettingsDialog(QtWidgets.QDialog, Ui_Dialog_Settings):
+
+    def __init__(self, *args, **kwargs):
+        super(SettingsDialog, self).__init__(*args, **kwargs)
+        self.setupUi(self)
+        self.setWindowTitle("Ajustes")
+        self.buttonBox.button(QDialogButtonBox.Ok).setText("Guardar")
+        self.buttonBox.button(QDialogButtonBox.Cancel).setText("Cancelar")
+        self.tabWidget.setCurrentIndex(0)
+
+        # Textos de cada pestaña
+        self.tabWidget.setTabText(0, "&General")
+        self.tabWidget.setTabText(1, "&Restricciones")
+        self.tabWidget.setTabText(2, "&Cantidades")
+        self.tabWidget.setTabText(3, "&Seguridad")
+
+        # Interfaz de pestaña GENERAL
+        self.label_1_1.setText("Semanas:")
+        self.spinBox_1_1.setValue(semanas)
+        self.label_1_2.setText("Comensales:")
+        self.spinBox_1_2.setValue(comensales)
+
+        # Interfaz de pestaña RESTRICCIONES
+        self.label_2_1.setText("Próximamente")
+
+        # Interfaz de pestaña CANTIDADES
+        self.label_3_1.setText("Unidades de medida:")
+        self.lineEdit_3_1.setText(lista_medidas)
+        self.label_3_2.setText("Cantidades parciales:")
+        self.lineEdit_3_2.setText(lista_cant)
+        self.label_3_3.setText("Cantidades típicas:")
+        self.lineEdit_3_3.setText(lista_cant_tipicas)
+
+        # Interfaz de pestaña SEGURIDAD
+        self.label_4_1.setText("Número de copias de seguridad simultáneas:")
+        self.spinBox_4_1.setValue(num_copias)
+
+
+def generarmenu():
+    """ Lanza la generación del menú y muestra un mensaje de confirmación
+    """
+    alert = QMessageBox()
+    alert.setWindowTitle("Generar Menú")
+    if generate_menu(semanas)[2] == OK:  # Ahora devuelvo comidas y cenas antes
+        message = "Menú generado correctamente"
+        print(message)
+        alert.setIcon(QMessageBox.Information)
     else:
-        print("Error al limpiar la pantalla. Fallo al detectar SO")
+        message = "Error al generar el menú"
+        print(message)
+        alert.setIcon(QMessageBox.Critical)
+    alert.setStandardButtons(QMessageBox.Ok)
+    alert.setText(message)
+    alert.exec_()
 
 
-# Función para mostrar cualquiera de los diccionarios de comidas o cenas
-def show_recipes(tipo):
-    global var
-    if tipo == "comida" or tipo == "cena":
-        if tipo == "comida":
-            tipo = dict_comidas
-        elif tipo == "cena":
-            tipo = dict_cenas
-        for plato, ingredientes in tipo.items():
-            print("\n*", plato)
-            var = var + "\n\n* " + plato
-            for ingred, medidas in ingredientes.items():
-                if (medidas[0] == 0 or medidas[0] == ""):
-                    print("\t-", ingred + ": Al gusto")
-                    var = var + "\n- " + ingred + ": Al gusto"
-                else:
-                    print("\t-", ingred + ":",
-                          " ".join(map(str, medidas)))
-                    var += "\n- " + ingred + ": " + " ".join(map(str, medidas))
-        var = var + "\n\n"
+def generarlista():
+    """ Lanza la generación de la lista de ingredientes y muestra
+    un mensaje de confirmación
+    """
+    alert = QMessageBox()
+    alert.setWindowTitle("Generar Lista de Ingredientes")
+    if generate_ingr_list(comensales) == OK:
+        message = "Lista de ingredientes generada correctamente"
+        alert.setIcon(QMessageBox.Information)
     else:
-        print("Error al mostrar recetas")
+        message = "Error al generar la lista de ingredientes"
+        print("Error al generar la lista de ingredientes")
+        alert.setIcon(QMessageBox.Critical)
+    alert.setStandardButtons(QMessageBox.Ok)
+    alert.setText(message)
+    alert.exec_()
 
 
-# Función para buscar en cualquiera de los diccionarios
-def search_recipes(filtro, tipo=" "):
-    global var
-    if tipo == " ":
-        search_recipes(filtro, dict_comidas)
-        search_recipes(filtro, dict_cenas)
+def buscarrecetas():
+    """ Muestra las recetas del tipo elegido, permitiendo filtrar por
+    ingredientes
+    """
+    diag = SearchDialog()
+    result = diag.exec_()
+    if result == 1:
+        print("El usuario ha hecho click en OK")
+        print("Buscando en " + str(diag.comboBox.currentText()))
+        if diag.radioButton.isChecked() is True:
+            print("Sin filtros")
+            fil = ""
+        elif diag.radioButton_2.isChecked() is True:
+            print("Filtro: " + str(diag.comboBox_2.currentText()))
+            fil = str(diag.comboBox_2.currentText())
+        else:
+            print("Error en los RadioButton: Ninguno seleccionado")
+        if show_recipes(str(diag.comboBox.currentText()).lower(), fil) == OK:
+            print("Búsqueda finalizada correctamente")
+        else:
+            print("Error en la búsqueda")
+    elif result == 0:
+        print("El usuario ha hecho click en CANCEL")
+
+
+def anadirrecetas():
+    """ Permite añadir nuevas recetas directamente desde la aplicación
+    """
+    diag = AddRecipeDialog()
+    result = diag.exec_()
+    if result == OK:
+        print("Añado " + receta)
+        ret = add_recipes()
+        if ret != OK:
+            print("Error al añadir receta")
+        else:
+            print("Receta añadida correctamente")
     else:
-        if tipo == "comida":
-            tipo = dict_comidas
-        elif tipo == "cena":
-            tipo = dict_cenas
-        for plato, ingredientes in tipo.items():
-            if plato.upper() == filtro.upper():
-                print("-", plato)
-                var = var + "\n\n*" + plato
-            for ingrediente, medidas in ingredientes.items():
-                if (ingrediente.upper() == filtro.upper()):
-                    print("-", plato)
-                    var = var + "\n\n*" + plato
+        print("Cancelado por el usuario")
+    return ret
+
+
+def ajustes():  # WIP. Falta que se guarde al modificar. Por ahora puedo verlos
+    """ Gestión de los ajustes
+    """
+    diag = SettingsDialog()
+    result = diag.exec_()
+
+
+def show_recipes(tipo, filtro):
+    """ Muestra un listado con los diccionarios de Comidas, Cenas o Ambos
+
+    Arguments:
+        tipo {str} -- puede venir "comidas", "cenas" o "ambos"
+        filtro {str} -- puede venir un ingrediente o vacío si no hay filtro
+
+    Returns:
+        [int] -- OK (0): Si todo va bien
+                 ERROR (-1): Si hay cualquier problema
+    """
+
+    ret = OK
+    encontrado = 0
+    if tipo in ("comidas", "cenas", "ambos"):
+        if tipo == "comidas":
+            dicc = dict_comidas
+            iteraciones = 1
+        elif tipo == "cenas":
+            dicc = dict_cenas
+            iteraciones = 1
+        elif tipo == "ambos":
+            dicc = dict_comidas
+            iteraciones = 2
+        for _ in range(iteraciones):
+            for plato, ingredientes in dicc.items():
+                if filtro == "" or filtro in ingredientes:
+                    print("\n*", plato)
+                    encontrado = 1
+                for ingred, medidas in ingredientes.items():
+                    if filtro == "" or filtro in ingredientes:
+                        if (medidas[0] == 0 or medidas[0] == ""):
+                            print("\t-", ingred + ": Al gusto")
+                        else:
+                            print("\t-", ingred + ":",
+                                  " ".join(map(str, medidas)))
+            if iteraciones == 2:  # Debo hacer una segunda iteración con cenas
+                dicc = dict_cenas
+                iteraciones -= 1
+        if encontrado == 0:
+            print("Ingrediente no encontrado")
+    else:
+        print("Error al mostrar recetas. Parámetro 'tipo': '" + tipo + "'")
+        ret = ERROR
+    return ret
 
 
 def load_data():
+    """ Carga los datos de los diccionarios y los ajustes para utilizarlos
+    en el programa.
+    """
+
+    print("Cargando datos...")
+    global semanas
+    global comensales
+    global lista_ingredientes
+    global lista_medidas
+    global lista_cant
+    global lista_cant_tipicas
+    global num_copias
     cantidad = []
-    with open("bbdd.txt") as f:
-        lists = [line.strip().split(';') for line in f.readlines()]
+    num_dospuntos = 0
+    ret = OK
+    with open("bbdd.txt") as fich:
+        lists = [line.strip().split(';') for line in fich.readlines()]
     for line in lists:
-        if(line[0][0] == "#"):  # Se ignora lo que venga en esa línea
+        if line[0][0] == "#":  # Se ignora lo que venga en esa línea
             continue
-        if(line[0] == "Comida"):
+
+        # Compruebo que haya tres ':' por ingrediente más 2 por el último
+        for item in line:
+            for caract in item:
+                if caract == ":":
+                    num_dospuntos += 1
+        print("Línea " + str(lists.index(line) + 1))
+        print("Número de ':': " + str(num_dospuntos))
+        if (num_dospuntos - 2) % 3 == 0:
+            print("Número de ingredientes: " +
+                  str(int((num_dospuntos - 2) / 3)))
+            print("Número de ':' Correcto")
+        else:
+            print("Número de ':' Incorrecto")
+            return ERROR
+        num_dospuntos = 0
+
+        if line[0] == "Comida":
             com_cen = "com"
             dict_comidas[line[1]] = {}
-        elif(line[0] == "Cena"):
+        elif line[0] == "Cena":
             com_cen = "cen"
             dict_cenas[line[1]] = {}
         ingrs = line[2].strip().split(':')
         for i in range(len(ingrs)):
-            if(i % 3 == 0 or i % 3 == 3):
+            if i % 3 == 0 or i % 3 == 3:
                 ingrediente = ingrs[i]
-            if(i % 3 == 1):
+                lista_ingredientes.append(ingrediente)
+            if i % 3 == 1:
                 cantidad.append(ingrs[i])
-            if(i % 3 == 2):
+            if i % 3 == 2:
                 cantidad.append(ingrs[i])
-                if(com_cen == "com"):
+                if com_cen == "com":
                     dict_comidas[line[1]].update({ingrediente: cantidad})
-                elif(com_cen == "cen"):
+                elif com_cen == "cen":
                     dict_cenas[line[1]].update({ingrediente: cantidad})
                 cantidad = []
+    print("Datos de recetas cargados")
+
+    with open("settings") as fich:
+        lists = [line.strip().split('#') for line in fich.readlines()]
+    for line in lists:
+        indice = lists.index(line)
+        if indice == 0:
+            semanas = int(line[0])
+        elif indice == 1:
+            comensales = int(line[0])
+        elif indice == 2:
+            lista_medidas = line[0]
+        elif indice == 3:
+            lista_cant = line[0]
+        elif indice == 4:
+            lista_cant_tipicas = line[0]
+        elif indice == 5:
+            num_copias = int(line[0])
+    print("Ajustes cargados")
+    return ret
 
 
-# Función para añadir recetas a mano
-def add_recipes(tipo, diccionario):
-    cantidad = []
-    plato = input("Introduce nombre para comida y pulsa Enter: ")
-    diccionario[plato] = {}
-    with open("bbdd.txt", "a") as f:
-        f.write(tipo+";"+plato+";")
-    while 1:
-        ingrediente = input("""Introduce ingrediente y pulsa Enter
-        (Si has terminado, pulsa Enter sin escribir nada): """)
-        if ingrediente == "":
-            break
-        print("Introduce cantidad de %s sin unidad y pulsa Enter."
-              % ingrediente.upper())
-        cantidad.append(input("(Puede dejarse vacío): "))
-        print("Introduce unidad de medida (g, ml, kg, ...).")
-        cantidad.append(input("(Puede dejarse vacío): "))
+def add_recipes():
+    """ Permite añadir recetas a los diccionarios
+    """
+    ret = OK
 
-        diccionario[plato].update({ingrediente: cantidad})
-        with open("bbdd.txt", "a") as f:
-            f.write(ingrediente+":"+cantidad[0]+":"+cantidad[1]+":")
-        cantidad = []
-    with open("bbdd.txt", 'rb+') as filehandle:
-        filehandle.seek(-1, os.SEEK_END)
-        filehandle.truncate()
-    with open("bbdd.txt", "a") as f:
-        f.write("\n")
-    print("Plato añadido")
+    with open("bbdd.txt", "a") as fich:
+        fich.write(receta + "\n")
+
+    print("Plato añadido. Vuelvo a cargar datos")
+
+    # Carga de datos
+    ret = load_data()
+    if ret != OK:
+        print("Error cargando datos")
+    else:
+        print("Todos los datos cargados")
+    return ret
 
 
-def generate_menu(semanas):
+def generate_menu(semanas):  # WIP. Returns, Revisión general, mejorar filtros, etc
+    """ Genera el menú para las semanas que queramos. Tiene algunas condiciones
+    Para considerar el menú como válido. En algún momento habrá que sacarlas
+    de aquí para que no estén a piñón en el código y vengan desde ajustes o
+    algo similar
+
+    Arguments:
+        semanas {int} -- Cantidad de semanas para las que genero menú. Viene
+                         de los ajustes
+    """
     comid = []
     global comidas
     comidas = []
@@ -169,9 +602,10 @@ def generate_menu(semanas):
 
     saltar = 0
     menu_ok = 0
+    ret = OK
 
-# Genero menú solo con condiciones de no repetir, y despues compruebo
-# las restricciones. Si están OK pongo menu_ok a 1
+    # Genero menú solo con condiciones de no repetir, y despues compruebo
+    # las restricciones. Si están OK pongo menu_ok a 1
     for semana in range(semanas):
         print("Planificando semana", semana+1, "de", semanas)
         while menu_ok == 0:
@@ -184,6 +618,7 @@ def generate_menu(semanas):
                 pescado_semana = 0
                 boniato_semana = 0
                 hamburguesa_semana = 0
+                legumbres_semana = 0
                 cena1 = random.choice(list(dict_cenas.keys()))
                 comida1 = random.choice(list(dict_comidas.keys()))
                 j = 1
@@ -196,67 +631,74 @@ def generate_menu(semanas):
                     boniato_semana = boniato_semana + 1
                 if "Boniato" in dict_cenas[cena1].keys():
                     boniato_semana = boniato_semana + 1
-                if (pescado_semana < 2 and boniato_semana < 2
-                   and comida1 != "Hamburguesa"):
+                if(pescado_semana < 2 and boniato_semana < 2 and
+                   comida1 != "Hamburguesa"):
                     primera_ok = 1
 
             cenas_wip.append(cena1)
             comidas_wip.append(comida1)
 
             while j < 7:
+                print("j = " + str(j))
                 comida2 = random.choice(list(dict_comidas.keys()))
                 cena2 = random.choice(list(dict_cenas.keys()))
                 if comida1 == comida2 or cena1 == cena2:
                     saltar = 1
-                if comida2 in comidas_wip or cena2 in cenas_wip:
-                    saltar = 1
-                if ("Arroz" in dict_comidas[comida1].keys()
+                # if comida2 in comidas_wip or cena2 in cenas_wip:
+                #    saltar = 1
+                if("Arroz" in dict_comidas[comida1].keys()
                    and "Arroz" in dict_comidas[comida2].keys()):
                     # No arroz dos comidas consecutivas
+                    print("Arroz dos comidas consecutivas")
                     saltar = 1
-                if ("Boniato" in dict_comidas[comida1].keys()
+                if("Boniato" in dict_comidas[comida1].keys()
                    and "Boniato" in dict_comidas[comida2].keys()):
                     # No boniato dos comidas consecutivas
+                    print("Boniato dos comidas consecutivas")
                     saltar = 1
-                if ("Pescado" in dict_comidas[comida1].keys()
+                if("Pescado" in dict_comidas[comida1].keys()
                    and "Pescado" in dict_comidas[comida2].keys()):
                     # No pescado dos comidas consecutivas
+                    print("Pescado dos comidas consecutivas")
                     saltar = 1
-                if ("Pescado" in dict_cenas[cena1].keys()
+                if("Pescado" in dict_cenas[cena1].keys()
                    and "Pescado" in dict_cenas[cena2].keys()):
                     # No pescado dos cenas consecutivas
                     saltar = 1
-                if ("Pescado" in dict_cenas[cena1].keys()
+                if("Pescado" in dict_cenas[cena1].keys()
                    and "Pescado" in dict_comidas[comida2].keys()):
                     # No pescado dos veces consecutivas
+                    print("Pescado dos veces consecutivas")
                     saltar = 1
-                if ("Pescado" in dict_comidas[comida2].keys()
+                if("Pescado" in dict_comidas[comida2].keys()
                    and "Pescado" in dict_cenas[cena2].keys()):
                     # No pescado dos veces consecutivas
+                    print("Pescado dos veces consecutivas")
                     saltar = 1
-                if ("Patata" in dict_comidas[comida1].keys()
+                if("Patata" in dict_comidas[comida1].keys()
                    and "Patata" in dict_comidas[comida2].keys()):
                     # No patata dos comidas consecutivas
+                    print("Patata dos comidas consecutivas")
                     saltar = 1
-                if ("Pasta colores" in dict_comidas[comida1].keys()
-                   or "Pasta espelta" in dict_comidas[comida1].keys()
-                   or "Pasta integral" in dict_comidas[comida1].keys()):
-                    if ("Pasta colores" in dict_comidas[comida2].keys()
-                       or "Pasta espelta" in dict_comidas[comida2].keys()
-                       or "Pasta integral" in dict_comidas[comida2].keys()):
-                        # No pasta dos comidas consecutivas
-                        saltar = 1
-                if ("Pavo" in dict_comidas[comida1].keys()
+                if("Pasta" in dict_comidas[comida1].keys()
+                   and "Pasta" in dict_comidas[comida2].keys()):
+                    # No pasta dos comidas consecutivas
+                    print("Pasta dos comidas consecutivas")
+                    saltar = 1
+                if("Pavo" in dict_comidas[comida1].keys()
                    and "Pavo" in dict_comidas[comida2].keys()):
                     # No pavo dos comidas seguidas
+                    print("Pavo dos comidas consecutivas")
                     saltar = 1
-                if ("Pollo" in dict_comidas[comida1].keys()
-                   and "Pavo" in dict_comidas[comida2].keys()):
+                if("Pollo" in dict_comidas[comida1].keys()
+                   and "Pollo" in dict_comidas[comida2].keys()):
                     # No pollo dos comidas seguidas
+                    print("Pollo dos comidas consecutivas")
                     saltar = 1
                 if comida2 == "Hamburguesa":
                     # Si ha salido hamburguesa y no es finde no nos vale
                     if (j != 4 and j != 5 and j != 6):
+                        print("Hamburguesa y no es finde")
                         saltar = 1
                 if saltar == 0:
                     comidas_wip.append(comida2)
@@ -270,24 +712,31 @@ def generate_menu(semanas):
                         pescado_semana = pescado_semana + 1
                     if "Boniato" in dict_comidas[comida2].keys():
                         boniato_semana = boniato_semana + 1
+                    if "Legumbres" in dict_comidas[comida2].keys():
+                        legumbres_semana = legumbres_semana + 1
                     if comida2 == "Hamburguesa":
                         hamburguesa_semana = hamburguesa_semana + 1
                 saltar = 0
 
             # Una vez generada una semana chequeo condiciones
             if (pescado_semana <= 2 and pescado_semana >= 1
-               and boniato_semana <= 2 and hamburguesa_semana == 1):
+               and boniato_semana <= 2 and legumbres_semana <= 2):
+               # and hamburguesa_semana == 1):
                 print("Menu OK")
                 print("Pescado:", pescado_semana, "Boniato:", boniato_semana,
-                      "Hamburguesa:", hamburguesa_semana)
+                        "Hamburguesa:", hamburguesa_semana, "Legumbres:",
+                        legumbres_semana)
                 print("Intentos:", intentos)
                 pescado_semana = 0
                 boniato_semana = 0
                 hamburguesa_semana = 0
+                legumbres_semana = 0
                 menu_ok = 1
                 intentos = 0
                 comidas.extend(comidas_wip)
                 cenas.extend(cenas_wip)
+            else:
+                print("No cumple condiciones")
         menu_ok = 0
 
     # Esta parte prepara los datos que hay en comidas y cenas
@@ -415,659 +864,133 @@ def generate_menu(semanas):
     doc.build(elements)
     menu_com = comidas
     menu_cen = cenas
-    return comidas, cenas
+    return comidas, cenas, ret
 
 
 def generate_ingr_list(personas):
-    lista_ingr = []
-    lista_ingrCant = []
-    lista_ingrUd = []
-    lista_ingrN = []
+    """ Genera la lista de ingredientes del menú generado previamente, para
+    el número de personas indicado
+
+    Arguments:
+        personas {int} -- Número de personas para calcular las cantidades
+    """
+    l_ingr = []
+    l_ingr_cant = []
+    l_ingr_ud = []
+    l_ingr_num = []
+    ret = OK
 
     for item in menu_com:
         for key, value in dict_comidas.get(item).items():
-            if key not in lista_ingr:
-                lista_ingr.append(key)
+            if key not in l_ingr:
+                l_ingr.append(key)
                 if value[0] != "":
-                    if ((value[0] == "0.5") or (value[0] == "1.0")
-                       or (value[0] == "1.5") or (value[0] == "2.0")):
-                        # Un poco chapuza, para los aguacates...
-                        # Puede que haga falta ampliarlo o mejorarlo
-                        lista_ingrCant.append(str(personas*float(value[0])))
+                    if value[0] in lista_cant:
+                        l_ingr_cant.append(str(personas*float(value[0])))
                     else:
-                        lista_ingrCant.append(str(personas*int(value[0])))
+                        l_ingr_cant.append(str(personas*int(value[0])))
                 else:
-                    lista_ingrCant.append(value[0])
-                lista_ingrUd.append(value[1])
-                lista_ingrN.append(1)
+                    l_ingr_cant.append(value[0])
+                l_ingr_ud.append(value[1])
+                l_ingr_num.append(1)
             else:
-                for i in lista_ingr:
+                for i in l_ingr:
                     if i == key:
-                        if lista_ingrUd[lista_ingr.index(key)] == value[1]:
-                            if lista_ingrCant[lista_ingr.index(key)] != "":
-                                if ((lista_ingrCant[lista_ingr.index(key)] ==
-                                     "0.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "1.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "1.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "2.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "2.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "3.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "3.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "4.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "4.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "5.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "5.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "6.0")):
-                                    # Un poco chapuza, para los aguacates.
-                                    # Puede que haga falta mejorarlo
-                                    print(lista_ingrCant
-                                          [lista_ingr.index(key)], value[0])
-                                    lista_ingrCant[lista_ingr.index(key)] = (
-                                        float(lista_ingrCant
-                                              [lista_ingr.index(key)]) +
+                        if l_ingr_ud[l_ingr.index(key)] == value[1]:
+                            if l_ingr_cant[l_ingr.index(key)] != "":
+                                if l_ingr_cant[l_ingr.
+                                               index(key)] in lista_cant:
+                                    print(l_ingr_cant
+                                          [l_ingr.index(key)], value[0])
+                                    l_ingr_cant[l_ingr.index(key)] = (
+                                        float(l_ingr_cant
+                                              [l_ingr.index(key)]) +
                                         float(personas)*float(value[0]))
-                                    lista_ingrCant[lista_ingr.index(key)] = (
-                                        str(lista_ingrCant
-                                            [lista_ingr.index(key)])
+                                    l_ingr_cant[l_ingr.index(key)] = (
+                                        str(l_ingr_cant
+                                            [l_ingr.index(key)])
                                     )
                                 else:
-                                    lista_ingrCant[lista_ingr.index(key)] = (
-                                        int(lista_ingrCant
-                                            [lista_ingr.index(key)]) +
+                                    l_ingr_cant[l_ingr.index(key)] = (
+                                        int(l_ingr_cant
+                                            [l_ingr.index(key)]) +
                                         personas*int(value[0]))
-                                    lista_ingrCant[lista_ingr.index(key)] = (
-                                        str(lista_ingrCant
-                                            [lista_ingr.index(key)]))
-                            lista_ingrN[lista_ingr.index(key)] += 1
+                                    l_ingr_cant[l_ingr.index(key)] = (
+                                        str(l_ingr_cant
+                                            [l_ingr.index(key)]))
+                            l_ingr_num[l_ingr.index(key)] += 1
                         else:
                             print("Error en las unidades de medida")
                             print("Revisar comidas de la bbdd (%s)" % i)
+                            ret = ERROR
     for item in menu_cen:
         for key, value in dict_cenas.get(item).items():
-            if key not in lista_ingr:
-                lista_ingr.append(key)
+            if key not in l_ingr:
+                l_ingr.append(key)
                 if value[0] != "":
-                    if ((value[0] == "0.5") or (value[0] == "1.0")
-                       or (value[0] == "1.5") or (value[0] == "2.0")):
-                        # Un poco chapuza, para los aguacates...
-                        # Puede que haga falta ampliarlo o mejorarlo
-                        lista_ingrCant.append(str(personas*float(value[0])))
+                    if value[0] in lista_cant:
+                        l_ingr_cant.append(str(personas*float(value[0])))
                     else:
-                        lista_ingrCant.append(str(personas*int(value[0])))
+                        l_ingr_cant.append(str(personas*int(value[0])))
                 else:
-                    lista_ingrCant.append(value[0])
-                lista_ingrUd.append(value[1])
-                lista_ingrN.append(1)
+                    l_ingr_cant.append(value[0])
+                l_ingr_ud.append(value[1])
+                l_ingr_num.append(1)
             else:
-                for i in lista_ingr:
+                for i in l_ingr:
                     print(i)
                     if i == key:
-                        if lista_ingrUd[lista_ingr.index(key)] == value[1]:
-                            if lista_ingrCant[lista_ingr.index(key)] != "":
-                                if ((lista_ingrCant[lista_ingr.index(key)] ==
-                                     "0.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "1.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "1.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "2.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "2.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "3.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "3.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "4.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "4.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "5.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "5.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "6.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "6.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "7.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "7.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "8.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "8.5") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "9.0") or
-                                    (lista_ingrCant[lista_ingr.index(key)] ==
-                                     "9.5")):
-                                    # Un poco chapuza, para los aguacates.
-                                    # Puede que haga falta mejorarlo
-                                    a = float(lista_ingrCant[lista_ingr.
-                                              index(key)])
+                        if l_ingr_ud[l_ingr.index(key)] == value[1]:
+                            if l_ingr_cant[l_ingr.index(key)] != "":
+                                if l_ingr_cant[l_ingr.
+                                               index(key)] in lista_cant:
+                                    a = float(l_ingr_cant[l_ingr.
+                                                          index(key)])
                                     b = float(personas)*float(value[0])
                                     c = a + b
-                                    lista_ingrCant[lista_ingr.index(key)] = c
-                                    d = str(lista_ingrCant
-                                            [lista_ingr.index(key)])
-                                    lista_ingrCant[lista_ingr.index(key)] = d
+                                    l_ingr_cant[l_ingr.index(key)] = c
+                                    d = str(l_ingr_cant
+                                            [l_ingr.index(key)])
+                                    l_ingr_cant[l_ingr.index(key)] = d
                                 else:
-                                    a = int(lista_ingrCant
-                                            [lista_ingr.index(key)])
+                                    a = int(l_ingr_cant[l_ingr.index(key)])
                                     b = personas*int(value[0])
                                     c = a + b
-                                    lista_ingrCant[lista_ingr.index(key)] = c
-                                    d = str(lista_ingrCant
-                                            [lista_ingr.index(key)])
-                                    lista_ingrCant[lista_ingr.index(key)] = d
-                            lista_ingrN[lista_ingr.index(key)] += 1
+                                    l_ingr_cant[l_ingr.index(key)] = c
+                                    d = str(l_ingr_cant[l_ingr.index(key)])
+                                    l_ingr_cant[l_ingr.index(key)] = d
+                            l_ingr_num[l_ingr.index(key)] += 1
                         else:
                             print("Error en las unidades de medida")
                             print("Revisar cenas de la bbdd (%s)" % i)
+                            ret = ERROR
 
     c = canvas.Canvas("lista_ingredientes.pdf")
     y = 0
     x = 100
     string = "LISTA DE INGREDIENTES PARA " + str(personas)
     c.drawString(200, 790, string)
-    for item in range(len(lista_ingr)):
-        print(str(lista_ingrN[item]) + "x -  " + lista_ingr[item] + ": " +
-              lista_ingrCant[item] + " " + lista_ingrUd[item])
-        c.drawString(x, 750-y, str(lista_ingrN[item]) + "x -  " +
-                     lista_ingr[item] + ": " + lista_ingrCant[item] + " "
-                     + lista_ingrUd[item])
+    for item in range(len(l_ingr)):
+        print(str(l_ingr_num[item]) + "x -  " + l_ingr[item] + ": " +
+              l_ingr_cant[item] + " " + l_ingr_ud[item])
+        c.drawString(x, 750-y, str(l_ingr_num[item]) + "x -  " +
+                     l_ingr[item] + ": " + l_ingr_cant[item] + " "
+                     + l_ingr_ud[item])
         y = y + 15
         if (750 - y) <= 100:
             x = 350
             y = 0
     c.save()
+    return ret
 
 
-##################################
-# MENÚ PRINCIPAL EN MODO CONSOLA #
-##################################
-
-def modo_consola():
-
-    print("Cargando datos...")
-    load_data()
-    time.sleep(0.5)
-    print("Datos cargados")
-    time.sleep(1)
-
-    while(1):
-        clear()
-        print("*MENU*\n")
-        print("\t1. Generar propuesta de menú")
-        print("\t2. Generar lista de ingredientes")
-        print("\t3. Mostrar recetas")
-        print("\t4. Añadir recetas")
-        print("\t5. Buscar")
-        print("\t6. Salir")
-
-        menu_ppal = int(input("\nSelecciona la opción: "))
-
-        if menu_ppal == 1:
-
-            print("Generar propuesta de menús")
-
-            print("Selecciona para cuánto tiempo quieres generar menú")
-            print("\t1. 1 semana")
-            print("\t2. 2 semanas")
-            semanas = int(input("\nSelecciona la opción: "))
-
-            (menu_com, menu_cen) = generate_menu(semanas)
-            input("Pulsa Enter para volver al menú principal")
-
-        elif menu_ppal == 2:
-
-            print("Generar lista de ingredientes")
-            personas = int(input("Introduce número de personas: "))
-
-            generate_ingr_list(personas)
-            input("\nPulsa Enter para volver al menú principal")
-
-        elif menu_ppal == 3:
-
-            print("Mostrar recetas")
-            print("\t1. Mostrar comidas")
-            print("\t2. Mostrar cenas")
-            menu_show = int(input("Selecciona la opción: "))
-            if menu_show == 1:
-                print("MOSTRAR COMIDAS")
-                show_recipes("comida")
-            elif menu_show == 2:
-                print("MOSTRAR CENAS")
-                show_recipes("cena")
-            else:
-                print("Error")
-            input("Pulsa Enter para volver al menú principal")
-
-        elif menu_ppal == 4:
-
-            print("Añadir recetas")
-            print("\t1. Añadir comida")
-            print("\t2. Añadir cena")
-            menu_add = int(input("Selecciona la opción: "))
-            if menu_add == 1:
-                print("AÑADIR COMIDAS")
-                add_recipes("Comida", dict_comidas)
-            elif menu_add == 2:
-                print("AÑADIR CENAS")
-                add_recipes("Cena", dict_cenas)
-            else:
-                print("Error")
-            input("Pulsa Enter para volver al menú principal")
-
-        elif menu_ppal == 5:
-
-            print("Buscar")
-            filtro = input("Introduce el plato o ingrediente a buscar: ")
-            print("\t1. Buscar en comidas")
-            print("\t2. Buscar en cenas")
-            print("\t3. Buscar en comidas y cenas")
-            menu_search = int(input("Selecciona la opción: "))
-            if menu_search == 1:
-                print("BUSCAR EN COMIDAS")
-                search_recipes(filtro, "comida")
-            elif menu_search == 2:
-                print("BUSCAR EN CENAS")
-                search_recipes(filtro, "cena")
-            elif menu_search == 3:
-                print("BUSCAR EN COMIDAS Y CENAS")
-                search_recipes(filtro)
-            else:
-                print("Error")
-            input("Pulsa Enter para volver al menú principal")
-
-        elif menu_ppal == 6:
-            clear()
-            break
-
-        else:
-            print("Error")
-            input("Pulsa Enter para volver al menú principal")
-
-
-##################################
-# MENÚ PRINCIPAL EN MODO GRÁFICO #
-##################################
-class VerticalScrolledFrame:
-    """
-    A vertically scrolled Frame that can be treated like any other Frame
-    ie it needs a master and layout and it can be a master.
-    keyword arguments are passed to the underlying Frame
-    except the keyword arguments 'width' and 'height', which
-    are passed to the underlying Canvas
-    note that a widget layed out in this frame will have Canvas as self.master,
-    if you subclass it there is no built in way for the children to access it.
-    You need to provide the controller separately.
-    """
-    def __init__(self, master, **kwargs):
-        width = kwargs.pop('width', None)
-        height = kwargs.pop('height', None)
-        self.outer = Frame(master, **kwargs)
-
-        self.vsb = Scrollbar(self.outer, orient=VERTICAL)
-        self.vsb.pack(fill=Y, side=RIGHT)
-        self.canvas = Canvas(self.outer, highlightthickness=0, width=width,
-                             height=height)
-        self.canvas.pack(side=LEFT, fill=BOTH, expand=True)
-        self.canvas['yscrollcommand'] = self.vsb.set
-        # mouse scroll does not seem to work with just "bind"; You have
-        # to use "bind_all". Therefore to use multiple windows you have
-        # to bind_all in the current widget
-        self.canvas.bind("<Enter>", self._bind_mouse)
-        self.canvas.bind("<Leave>", self._unbind_mouse)
-        self.vsb['command'] = self.canvas.yview
-
-        self.inner = Frame(self.canvas)
-        # pack the inner Frame into the Canvas with the top left corner
-        # 4 pixels offset
-        self.canvas.create_window(4, 4, window=self.inner, anchor='nw')
-        self.inner.bind("<Configure>", self._on_frame_configure)
-
-        self.outer_attr = set(dir(Widget))
-
-    def __getattr__(self, item):
-        if item in self.outer_attr:
-            # geometry attributes etc (eg pack, destroy, tkraise)
-            # are passed on to self.outer
-            return getattr(self.outer, item)
-        else:
-            # all other attributes (_w, children, etc) are passed to self.inner
-            return getattr(self.inner, item)
-
-    def _on_frame_configure(self, event=None):
-        x1, y1, x2, y2 = self.canvas.bbox("all")
-        height = self.canvas.winfo_height()
-        self.canvas.config(scrollregion=(0, 0, x2, max(y2, height)))
-
-    def _bind_mouse(self, event=None):
-        self.canvas.bind_all("<4>", self._on_mousewheel)
-        self.canvas.bind_all("<5>", self._on_mousewheel)
-        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-
-    def _unbind_mouse(self, event=None):
-        self.canvas.unbind_all("<4>")
-        self.canvas.unbind_all("<5>")
-        self.canvas.unbind_all("<MouseWheel>")
-
-    def _on_mousewheel(self, event):
-        """Linux uses event.num; Windows / Mac uses event.delta"""
-        if event.num == 4 or event.delta > 0:
-            self.canvas.yview_scroll(-1, "units")
-        elif event.num == 5 or event.delta < 0:
-            self.canvas.yview_scroll(1, "units")
-
-
-class Aplicacion():
-
-    def __init__(self):
-
-        load_data()
-
-        self.raiz = Tk()
-        # self.raiz.geometry('600x400')
-        self.raiz.resizable(width=False, height=False)
-        self.raiz.title('MenuPlanner')
-
-        # DEFINIR BARRA DE MENÚ DE LA APLICACION:
-        barramenu = Menu(self.raiz)
-        self.raiz['menu'] = barramenu
-
-        # DEFINIR SUBMENÚS 'Opciones' y 'Ayuda':
-
-        menuopciones = Menu(barramenu)
-        menuayuda = Menu(barramenu)
-        barramenu.add_cascade(menu=menuopciones, label='Opciones')
-        barramenu.add_cascade(menu=menuayuda, label='Ayuda')
-
-        menuopciones.add_command(label='Ver base de datos',
-                                 command=self.raiz.destroy, compound=LEFT)
-        menuopciones.add_separator()  # Agrega un separador
-        menuopciones.add_command(label='Salir', command=self.raiz.destroy,
-                                 compound=LEFT)
-
-        menuayuda.add_command(label="Acerca de", command=self.f_acerca,
-                              compound=LEFT)
-
-        self.bgenerarmenu = ttk.Button(self.raiz, text='Generar menú',
-                                       command=self.generarmenu)
-        self.bgenerarlista = ttk.Button(self.raiz,
-                                        text='Generar lista de ingredientes',
-                                        command=self.generarlista)
-        self.bshow = ttk.Button(self.raiz, text='Mostrar recetas',
-                                command=self.show)
-        self.badd = ttk.Button(self.raiz, text='Añadir recetas',
-                               command=self.add)
-        self.bsearch = ttk.Button(self.raiz, text='Buscar',
-                                  command=self.search)
-        self.bsalir = ttk.Button(self.raiz, text='Salir',
-                                 command=self.raiz.destroy)
-        self.separador = ttk.Separator()
-
-        self.bgenerarmenu.pack(side=TOP, fill=BOTH, expand=True, padx=20,
-                               pady=20)
-        self.bgenerarlista.pack(side=TOP, fill=BOTH, expand=True, padx=20,
-                                pady=0)
-        self.bshow.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=20)
-        self.badd.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=0)
-        self.bsearch.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=20)
-        self.separador.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=0)
-        self.bsalir.pack(side=TOP, fill=BOTH, expand=True, padx=20, pady=20)
-
-        self.bgenerarmenu.focus_set()
-        self.raiz.mainloop()
-
-    def generarmenu(self):
-
-        # Función para lanzar "generar menú" y después una pantalla de OK
-        def genmenu():
-            generate_menu(self.semanas.get())
-            ok = Toplevel()
-            marco = ttk.Frame(ok, padding=(10, 10, 10, 10), relief=RAISED)
-            marco.pack(side=TOP, fill=BOTH, expand=True)
-
-            etiq = Label(marco, text="Operación completada")
-            etiq.pack(side=TOP, padx=10, pady=10)
-            boton = Button(marco, text="Salir", command=ok.destroy)
-            boton.pack(side=TOP, padx=10, pady=10)
-            boton.focus_set()
-
-            ok.transient(master=self.dialogo)
-            ok.grab_set()
-            self.dialogo.wait_window(ok)
-
-        # Muestra nueva ventana que pide si quieres generar una o dos semanas
-        self.dialogo = Toplevel()
-        self.semanas = IntVar(value=1)
-
-        radiouna = ttk.Radiobutton(self.dialogo, text='Una semana',
-                                   variable=self.semanas, value=1)
-        radiodos = ttk.Radiobutton(self.dialogo, text='Dos semanas',
-                                   variable=self.semanas, value=2)
-        botongenerar = ttk.Button(self.dialogo, text='Generar',
-                                  command=lambda: genmenu())
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
-                                 command=self.dialogo.destroy)
-
-        radiouna.pack(side=TOP, padx=20, pady=20)
-        radiodos.pack(side=TOP, padx=20, pady=0)
-        botongenerar.pack(side=LEFT, padx=20, pady=20)
-        botoncerrar.pack(side=RIGHT, padx=20, pady=20)
-
-        botongenerar.wait_variable(self.semanas)
-
-        self.dialogo.transient(master=self.raiz)
-        self.dialogo.grab_set()
-        self.raiz.wait_window(self.dialogo)
-
-    def generarlista(self):
-
-        # Función para lanzar "generar lista de ingredientes"
-        # y después una pantalla de OK
-        def genlista():
-            generate_ingr_list(self.personas.get())
-            ok = Toplevel()
-            marco = ttk.Frame(ok, padding=(10, 10, 10, 10), relief=RAISED)
-            marco.pack(side=TOP, fill=BOTH, expand=True)
-
-            etiq = Label(marco, text="Operación completada")
-            etiq.pack(side=TOP, padx=10, pady=10)
-            boton = Button(marco, text="Salir", command=ok.destroy)
-            boton.pack(side=TOP, padx=10, pady=10)
-            boton.focus_set()
-
-            ok.transient(master=self.dialogo)
-            ok.grab_set()
-            self.dialogo.wait_window(ok)
-
-        # Muestra una nueva ventana que pide si quieres para una o dos personas
-        self.dialogo = Toplevel()
-        self.personas = IntVar(value=1)
-
-        radiouna = ttk.Radiobutton(self.dialogo, text='Una persona',
-                                   variable=self.personas, value=1)
-        radiodos = ttk.Radiobutton(self.dialogo, text='Dos personas',
-                                   variable=self.personas, value=2)
-        botongenerar = ttk.Button(self.dialogo, text='Generar',
-                                  command=lambda: genlista())
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
-                                 command=self.dialogo.destroy)
-
-        radiouna.pack(side=TOP, padx=20, pady=20)
-        radiodos.pack(side=TOP, padx=20, pady=0)
-        botongenerar.pack(side=LEFT, padx=20, pady=20)
-        botoncerrar.pack(side=RIGHT, padx=20, pady=20)
-
-        self.dialogo.transient(master=self.raiz)
-        self.dialogo.grab_set()
-        self.raiz.wait_window(self.dialogo)
-
-    def show(self):
-
-        # Función para lanzar "mostrar recetas" en una nueva ventana
-        # con un scrollbar vertical
-        def muestrarecetas():
-            global var
-            var = ""
-
-            show_recipes(self.tipo.get())
-            ok = Toplevel()
-
-            frame = VerticalScrolledFrame(ok, width=470, relief=SUNKEN)
-            frame.pack(fill=BOTH, expand=True)  # fill window
-
-            label = Label(frame, text=var)
-            label.grid(column=1, row=1, sticky=W)
-
-            ok.transient(master=self.dialogo)
-            ok.grab_set()
-            self.dialogo.wait_window(ok)
-
-        # Muestra una nueva ventana que pide si quieres ver comidas o cenas
-        self.dialogo = Toplevel()
-        self.tipo = StringVar(value="comida")
-        self.txt = StringVar()
-
-        radiocomidas = ttk.Radiobutton(self.dialogo, text='Comidas',
-                                       variable=self.tipo, value="comida")
-        radiocenas = ttk.Radiobutton(self.dialogo, text='Cenas',
-                                     variable=self.tipo, value="cena")
-        botonmostrar = ttk.Button(self.dialogo, text='Mostrar',
-                                  command=lambda: muestrarecetas())
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
-                                 command=self.dialogo.destroy)
-
-        radiocomidas.pack(side=TOP, padx=20, pady=20)
-        radiocenas.pack(side=TOP, padx=20, pady=0)
-        botonmostrar.pack(side=LEFT, padx=20, pady=20)
-        botoncerrar.pack(side=RIGHT, padx=20, pady=20)
-
-        self.dialogo.transient(master=self.raiz)
-        self.dialogo.grab_set()
-        self.raiz.wait_window(self.dialogo)
-
-    def add(self):
-
-        # Muestra una nueva ventana que pide si quieres añadir comidas o cenas
-        self.dialogo = Toplevel()
-        self.tipo = IntVar(value=1)
-
-        radiocomidas = ttk.Radiobutton(self.dialogo, text='Comidas',
-                                       variable=self.tipo, value=1)
-        radiocenas = ttk.Radiobutton(self.dialogo, text='Cenas',
-                                     variable=self.tipo, value=2)
-        botonanadir = ttk.Button(self.dialogo, text='Añadir',
-                                 command=self.dialogo.destroy)
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
-                                 command=self.dialogo.destroy)
-
-        radiocomidas.pack(side=TOP, padx=20, pady=20)
-        radiocenas.pack(side=TOP, padx=20, pady=0)
-        botonanadir.pack(side=LEFT, padx=20, pady=20)
-        botoncerrar.pack(side=RIGHT, padx=20, pady=20)
-
-        self.dialogo.transient(master=self.raiz)
-        self.dialogo.grab_set()
-        self.raiz.wait_window(self.dialogo)
-
-    def search(self):
-
-        # Función para lanzar "buscar recetas" en una nueva ventana
-        # con un scrollbar vertical
-        def buscarecetas():
-            global var
-            var = ""
-
-            search_recipes(self.busq.get(), self.tipo.get())
-            ok = Toplevel()
-
-            frame = VerticalScrolledFrame(ok, width=470, relief=SUNKEN)
-            frame.pack(fill=BOTH, expand=True)  # fill window
-
-            label = Label(frame, text=var)
-            label.grid(column=1, row=1, sticky=W)
-
-            ok.transient(master=self.dialogo)
-            ok.grab_set()
-            self.dialogo.wait_window(ok)
-
-        # Muestra una nueva ventana que pide si quieres buscar
-        # en comidas, cenas o ambas
-        self.dialogo = Toplevel()
-        self.tipo = StringVar(value="comida")
-        self.busq = StringVar()
-
-        labelbusqueda = ttk.Label(self.dialogo, text="Comida o ingrediente:")
-        entrybusqueda = ttk.Entry(self.dialogo, textvariable=self.busq,
-                                  width=25)
-        radiocomidas = ttk.Radiobutton(self.dialogo, text='Comidas',
-                                       variable=self.tipo, value="comida")
-        radiocenas = ttk.Radiobutton(self.dialogo, text='Cenas',
-                                     variable=self.tipo, value="cena")
-        radioambas = ttk.Radiobutton(self.dialogo, text='Ambas',
-                                     variable=self.tipo, value=" ")
-        botonbuscar = ttk.Button(self.dialogo, text='Buscar',
-                                 command=lambda: buscarecetas())
-        botoncerrar = ttk.Button(self.dialogo, text='Cerrar',
-                                 command=self.dialogo.destroy)
-
-        labelbusqueda.pack(side=TOP, padx=20, pady=20)
-        entrybusqueda.pack(side=TOP, padx=20, pady=0)
-        radiocomidas.pack(side=TOP, padx=20, pady=20)
-        radiocenas.pack(side=TOP, padx=20, pady=0)
-        radioambas.pack(side=TOP, padx=20, pady=20)
-        botonbuscar.pack(side=LEFT, padx=20, pady=20)
-        botoncerrar.pack(side=RIGHT, padx=20, pady=20)
-
-        self.dialogo.transient(master=self.raiz)
-        self.dialogo.grab_set()
-        self.raiz.wait_window(self.dialogo)
-
-    def f_acerca(self):
-
-        acerca = Toplevel()
-        acerca.resizable(width=False, height=False)
-        acerca.title("Acerca de")
-        marco1 = ttk.Frame(acerca, padding=(10, 10, 10, 10),
-                           relief=RAISED)
-        marco1.pack(side=TOP, fill=BOTH, expand=True)
-
-        etiq1 = Label(marco1, text=__title__+" v"+__version__)
-        etiq1.pack(side=TOP, padx=10)
-        etiq2 = Label(marco1, text=__author__)
-        etiq2.pack(side=TOP, padx=10)
-        etiq3 = Label(marco1, text=__date__)
-        etiq3.pack(side=TOP, padx=10)
-        boton1 = Button(marco1, text="Salir", command=acerca.destroy)
-        boton1.pack(side=TOP, padx=10, pady=10)
-        boton1.focus_set()
-        acerca.transient(self.raiz)
-        self.raiz.wait_window(acerca)
-
-
-def main():
-
-    if modo_grafico is True:
-        Aplicacion()
+if __name__ == "__main__":
+    # Carga inicial de datos
+    if load_data() != OK:
+        print("Error cargando datos")
     else:
-        modo_consola()
-    return 0
-
-
-if __name__ == '__main__':
-    main()
+        print("Todos los datos cargados")
+    APP = QtWidgets.QApplication([])
+    WINDOW = MainWindow()
+    WINDOW.show()
+    APP.exec_()
