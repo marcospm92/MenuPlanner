@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "simple": {
+      "format": "%(asctime)s - %(levelname).1s - %(funcName)s: %(message)s"
+    }
+  },
+
+  "handlers": {
+    "console": {
+      "class": "logging.StreamHandler",
+      "level": "DEBUG",
+      "formatter": "simple",
+      "stream": "ext://sys.stdout"
+    },
+
+    "debug_timed_rotating_file_handler": {
+      "class": "logging.handlers.TimedRotatingFileHandler",
+      "level": "DEBUG",
+      "formatter": "simple",
+      "filename": "debug.log",
+      "when": "midnight",
+      "interval": 1,
+      "backupCount": 10,
+      "encoding": "utf8",
+      "utc": "False"
+    },
+
+    "info_timed_rotating_file_handler": {
+      "class": "logging.handlers.TimedRotatingFileHandler",
+      "level": "INFO",
+      "formatter": "simple",
+      "filename": "info.log",
+      "when": "midnight",
+      "interval": 1,
+      "backupCount": 10,
+      "encoding": "utf8",
+      "utc": "False"
+    },
+
+    "error_timed_rotating_file_handler": {
+      "class": "logging.handlers.TimedRotatingFileHandler",
+      "level": "ERROR",
+      "formatter": "simple",
+      "filename": "error.log",
+      "when": "midnight",
+      "interval": 1,
+      "backupCount": 10,
+      "encoding": "utf8",
+      "utc": "False"
+    }
+  },
+
+  "loggers": {
+    "my_module": {
+      "level": "ERROR",
+      "handlers": ["console"],
+      "propagate": false
+    }
+  },
+
+  "root": {
+    "level": "DEBUG",
+    "handlers": ["debug_timed_rotating_file_handler",
+                 "info_timed_rotating_file_handler",
+                 "error_timed_rotating_file_handler"]
+  }
+}
