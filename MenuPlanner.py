@@ -7,8 +7,8 @@
 
 __author__ = 'Marcos Pérez Martín'
 __title__ = 'MenuPlanner'
-__date__ = '31/10/2019'
-__version__ = '2.0.2'
+__date__ = '18/11/2019'
+__version__ = '2.0.3'
 
 import time
 import os
@@ -25,6 +25,7 @@ import logging.config
 import shutil
 import glob
 from datetime import datetime
+from unidecode import unidecode
 
 from MenuPlanner_ui import QtWidgets, Ui_MainWindow
 from SearchDialog_ui import Ui_Dialog as Ui_Dialog_Search
@@ -88,6 +89,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_4.clicked.connect(anadir_recetas)
         self.pushButton_5.clicked.connect(mostrar_ajustes)
         self.pushButton_6.clicked.connect(exit)
+        self.actionAcerca_de.triggered.connect(acerca_de)
 
 
 class SearchDialog(QtWidgets.QDialog, Ui_Dialog_Search):
@@ -240,57 +242,107 @@ class AddIngredientDialog(QtWidgets.QDialog, Ui_Dialog_AddIngredient):
     def accept(self):  # Si pongo otro no me debe dejar ponerlo en blanco
         global receta
         global receta_orig
+        ingr_ok = 0
+        cant_ok = 0
+        ud_ok = 0
 
         logger.info("Click en ACEPTAR")
         if self.comboBox.currentIndex() == len(self.comboBox) - 1:
             if self.lineEdit.text() != "":
                 text_ingr = self.lineEdit.text()
+                if (unidecode(text_ingr.lower()) in (unidecode(x.lower())
+                                                     for x in
+                                                     lista_ingredientes)):
+                    logger.debug("El ingrediente ya existe: '%s'", text_ingr)
+                    alert = QMessageBox()
+                    alert.setWindowTitle("Añadir Ingrediente")
+                    alert.setIcon(QMessageBox.Information)
+                    alert.setStandardButtons(QMessageBox.Ok)
+                    alert.setText("El ingrediente '" + text_ingr +
+                                  "' ya existe.\nSelecciónalo del desplegable")
+                    alert.exec_()
+                else:
+                    ingr_ok = 1
             else:
                 logger.error("Error en ingrediente escrito (vacío)")
+                ingr_ok = 0
         else:
             text_ingr = self.comboBox.currentText()
+            ingr_ok = 1
 
         if self.comboBox_2.currentIndex() == len(self.comboBox_2) - 1:
             if self.lineEdit_2.text() != "":
                 text_cant = self.lineEdit_2.text()
+                texto = unidecode('"' + text_cant.lower() + '"')
+                if (texto in (unidecode(x.lower()) for x in
+                              lista_cant_tipicas.strip('][ ').split(', '))):
+                    logger.debug("La cantidad ya existe: '%s'", text_cant)
+                    alert = QMessageBox()
+                    alert.setWindowTitle("Añadir Ingrediente")
+                    alert.setIcon(QMessageBox.Information)
+                    alert.setStandardButtons(QMessageBox.Ok)
+                    alert.setText("La cantidad '" + text_cant +
+                                  "' ya existe.\nSelecciónala del desplegable")
+                    alert.exec_()
+                else:
+                    cant_ok = 1
             else:
                 logger.error("Error en cantidad escrita (vacía)")
+                cant_ok = 0
         else:
             text_cant = self.comboBox_2.currentText()
+            cant_ok = 1
 
         if self.comboBox_3.currentIndex() == len(self.comboBox_3) - 1:
             if self.lineEdit_3.text() != "":
                 text_uds = self.lineEdit_3.text()
+                texto = unidecode('"' + text_uds.lower() + '"')
+                if (texto in (unidecode(x.lower()) for x in
+                              lista_medidas.strip('][ ').split(', '))):
+                    logger.debug("La unidad ya existe: '%s'", text_uds)
+                    alert = QMessageBox()
+                    alert.setWindowTitle("Añadir Ingrediente")
+                    alert.setIcon(QMessageBox.Information)
+                    alert.setStandardButtons(QMessageBox.Ok)
+                    alert.setText("La unidad de medida '" + text_uds +
+                                  "' ya existe.\nSelecciónala del desplegable")
+                    alert.exec_()
+                else:
+                    ud_ok = 1
             else:
                 logger.error("Error en unidades escritas (vacías)")
+                ud_ok = 0
         else:
             text_uds = self.comboBox_3.currentText()
+            ud_ok = 1
 
-        logger.debug("Ingrediente: '%s'", text_ingr)
-        logger.debug("Cantidad: '%s'", text_cant)
-        logger.debug("Unidades de medida: '%s'", text_uds)
+        if ingr_ok and cant_ok and ud_ok:
+            logger.debug("Pasa los controles")
+            logger.debug("Ingrediente: '%s'", text_ingr)
+            logger.debug("Cantidad: '%s'", text_cant)
+            logger.debug("Unidades de medida: '%s'", text_uds)
 
-        receta = receta + text_ingr + ":" + text_cant + ":" + text_uds
+            receta = receta + text_ingr + ":" + text_cant + ":" + text_uds
 
-        alert = QMessageBox()
-        alert.setWindowTitle("Ingrediente añadido")
-        alert.setIcon(QMessageBox.Information)
-        alert.setStandardButtons(QMessageBox.Ok)
-        alert.setText("Ingrediente añadido correctamente")
-        alert.exec_()
+            alert = QMessageBox()
+            alert.setWindowTitle("Ingrediente añadido")
+            alert.setIcon(QMessageBox.Information)
+            alert.setStandardButtons(QMessageBox.Ok)
+            alert.setText("Ingrediente añadido correctamente")
+            alert.exec_()
 
-        if self.checkBox.isChecked():
-            logger.debug("CheckBox Último Ingrediente marcado")
-            diag = ConfirmRecipeDialog()
-            result = diag.exec_()
-            if result == OK:
-                logger.info("Salgo OK de la función")
-                self.done(OK)
+            if self.checkBox.isChecked():
+                logger.debug("CheckBox Último Ingrediente marcado")
+                diag = ConfirmRecipeDialog()
+                result = diag.exec_()
+                if result == OK:
+                    logger.info("Salgo OK de la función")
+                    self.done(OK)
+                else:
+                    logger.error("Error al confirmar receta")
+                    logger.info("Salgo de la función")
             else:
-                logger.error("Error al confirmar receta")
-                logger.info("Salgo de la función")
-        else:
-            receta = receta + ":"
+                receta = receta + ":"
 
     def reject(self):
         global receta
@@ -405,9 +457,9 @@ class SettingsDialog(QtWidgets.QDialog, Ui_Dialog_Settings):
         logger.debug("lista_cant_tipicas: %s", self.lineEdit_3_3.text())
         logger.debug("Num_copias: %d", self.spinBox_4_1.value())
 
-        with open("settings") as fich:
+        with open("settings", encoding="utf-8") as fich:
             lists = [line.strip().split('#') for line in fich.readlines()]
-        fich_new = open("new_settings", "w")
+        fich_new = open("new_settings", "w", encoding="utf-8")
         for line in lists:
             indice = lists.index(line)
             if indice == 0:  # Semanas
@@ -465,7 +517,7 @@ def setup_logging(default_path='logging.json', default_level=logging.DEBUG,
     if value:
         path = value
     if os.path.exists(path):
-        with open(path, 'rt') as fich:
+        with open(path, 'rt', encoding="utf-8") as fich:
             config = json.load(fich)
         logging.config.dictConfig(config)
         logger.info("Configuración del Logger cargada desde fichero")
@@ -513,7 +565,7 @@ def generar_lista():
     else:
         if generate_ingr_list(comensales) == OK:
             message = ("<a href=lista_ingredientes.pdf> <font color=black>" +
-                       "Lista generada correctamente." +
+                       "Lista generada correctamente. " +
                        "Click para abrir</font></a>")
             logger.info(message)
             alert.setIcon(QMessageBox.Information)
@@ -627,16 +679,16 @@ def show_recipes(tipo, filtro):
         for _ in range(iteraciones):
             for plato, ingredientes in dicc.items():
                 if filtro == "" or filtro in ingredientes:
-                    #print("\n*", plato)
+                    # print("\n*", plato)
                     resultado += "\n*" + plato
                     encontrado = 1
                 for ingred, medidas in ingredientes.items():
                     if filtro == "" or filtro in ingredientes:
                         if (medidas[0] == 0 or medidas[0] == ""):
-                            #print("\t-", ingred + ": Al gusto")
+                            # print("\t-", ingred + ": Al gusto")
                             resultado += "\n\t-" + ingred + ": Al gusto"
                         else:
-                            #print("\t-", ingred + ":",
+                            # print("\t-", ingred + ":",
                             #      " ".join(map(str, medidas)))
                             resultado += "\n\t-" + ingred + ":"
                             resultado += " ".join(map(str, medidas))
@@ -672,7 +724,7 @@ def load_data(modo):
         cantidad = []
         num_dospuntos = 0
 
-        with open("bbdd") as fich:
+        with open("bbdd", encoding="utf-8") as fich:
             lists = [line.strip().split(';') for line in fich.readlines()]
         for line in lists:
             # Compruebo que haya tres ':' por ingrediente más 2 por el último
@@ -731,7 +783,7 @@ def load_data(modo):
         global lista_consola
         global lista_pdf
 
-        with open("settings") as fich:
+        with open("settings", encoding="utf-8") as fich:
             lists = [line.strip().split('#') for line in fich.readlines()]
         for line in lists:
             indice = lists.index(line)
@@ -781,7 +833,7 @@ def add_recipes():
     ret = OK
 
     logger.info("Entro a la función")
-    with open("bbdd", "a") as fich:
+    with open("bbdd", "a", encoding="utf-8") as fich:
         fich.write(receta + "\n")
 
     logger.debug("Plato añadido. Vuelvo a cargar datos")
@@ -1150,7 +1202,8 @@ def generate_ingr_list(personas):
                     l_ing.append(key)
                     if value[0] != "":
                         logger.debug("'%s' no está vacío", value[0])
-                        if value[0] in lista_cant:
+                        # if value[0] in lista_cant:
+                        if float(value[0]) == 0.5:
                             logger.debug("'%s' está en la lista de " +
                                          "cantidades parciales. Añado '%f'",
                                          value[0], personas*float(value[0]))
@@ -1187,8 +1240,9 @@ def generate_ingr_list(personas):
                                     logger.debug("La cantidad no está vacía:" +
                                                  " '%s'",
                                                  l_ing_cant[l_ing.index(key)])
-                                    if l_ing_cant[l_ing.
-                                                  index(key)] in lista_cant:
+                                    # if l_ing_cant[l_ing.
+                                    #               index(key)] in lista_cant:
+                                    if float(value[0]) == 0.5:
                                         logger.debug("Encuentro la cantidad " +
                                                      "en la lista de " +
                                                      "cantidades parciales")
@@ -1283,6 +1337,17 @@ def copia_seguridad(fich):
         shutil.copy(fich, fich + datetime.now().strftime("%Y%m%d%H%M%S"))
         logger.debug("Fichero creado")
     logger.debug("Salgo de la función")
+
+
+def acerca_de():
+    alert = QMessageBox()
+    alert.setWindowTitle("Acerca de")
+    alert.setIcon(QMessageBox.Information)
+    alert.setStandardButtons(QMessageBox.Ok)
+    alert.setText("Autor: " + __author__ + "\nTítulo: " + __title__ +
+                  "\nFecha: " + __date__ + "\nVersión: " + __version__)
+    alert.exec_()
+
 
 if __name__ == "__main__":
     num_copias = 0

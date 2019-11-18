@@ -39,3 +39,15 @@ Ver 2.0.2 - 31/10/19
 - Añadida gestión de copias de seguridad de base de datos y ajustes.
 - Corregido un bug a la hora de añadir recetas. Al pulsar CANCEL se añadían
     igualmente.
+
+Ver 2.0.3 - 18/11/19
+- A la hora de generar menú en Windows aparecían caracteres extraños. Esto es
+    por el encoding de los ficheros, que es distinto en Linux (donde se han
+    creado) que en Windows. Ahora al abrir un fichero se fuerza el encoding a
+    "utf-8", con lo que el problema debería quedar resuelto.
+- Añadida comprobación al crear recetas de si el ingrediente, cantidad o unidad
+    de medida que se ha escrito a mano ya existía previamente en la lista.
+- Añadida barra superior de menú con la opción 'Acerca de', la cual abre una
+    ventana nueva con los datos de la aplicación.
+- Pequeña modificación para gestionar mejor los ingredientes con cantidades
+    parciales, como los aguacates y su 0'5.

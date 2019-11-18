@@ -54,10 +54,16 @@ class Ui_MainWindow(object):
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 600, 22))
         self.menubar.setObjectName("menubar")
+        self.menuAcerca_de = QtWidgets.QMenu(self.menubar)
+        self.menuAcerca_de.setObjectName("menuAcerca_de")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.actionAcerca_de = QtWidgets.QAction(MainWindow)
+        self.actionAcerca_de.setObjectName("actionAcerca_de")
+        self.menuAcerca_de.addAction(self.actionAcerca_de)
+        self.menubar.addAction(self.menuAcerca_de.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -72,6 +78,8 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "TextLabel"))
         self.pushButton_5.setText(_translate("MainWindow", "PushButton"))
         self.pushButton_2.setText(_translate("MainWindow", "PushButton"))
+        self.menuAcerca_de.setTitle(_translate("MainWindow", "Ayuda"))
+        self.actionAcerca_de.setText(_translate("MainWindow", "Acerca de"))
 
 
 if __name__ == "__main__":
