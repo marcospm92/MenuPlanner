@@ -53,6 +53,13 @@ Comida;Arroz con verduras y huevos a la plancha;Arroz:80:g:Verdura:::Huevo:2:
 Comida;Boniato, verdura, tofu y aguacate;Boniato:140:g:Verdura:::Tofu:120:g:Aguacate:0.5:
 Comida;Arroz con gambas, aguacate y verdura. Sepia;Arroz:80:g:Gambitas:30:g:Aguacate:0.5::Verdura:::Sepia:150:g
 Comida;Arroz con gambas, aguacate y verdura. Calamares;Arroz:80:g:Gambitas:30:g:Aguacate:0.5::Verdura:::Calamares:150:g
+Comida;Caldo, pasta, pollo y frutos secos;Caldo:::Pasta:80:g:Pollo:150:g:Frutos secos:10:g
+Comida;Quinoa con verduras, edamame, huevos y aguacate;Quinoa:80:g:Verdura:::Edamame:::Huevo:2::Aguacate:0.5:
+Comida;Legumbres, tomates cherry, champiñones y burger;Legumbres:130:g:Tomates cherry:::Champiñones:::Burger:150:g
+Comida;Pasta, tomate tamizado, queso feta, verdura y pescado;Pasta:80:g:Tomate tami.:2:cuch.:Queso Feta:30:g:Verdura:::Pescado:150:g
+Comida;Tortilla, patatas y verduras;Huevo:1::Claras:100:ml:Patata:150:g:Verdura::
+Comida;Arroz, verduras, lomo y aguacate;Arroz:80:g:Verdura:::Aguacate:0.5::Lomo:120:g
+Comida;Arroz, verduras, ternera y aguacate;Arroz:80:g:Verdura:::Aguacate:0.5::Ternera:120:g
 #Cena;Ensalada de salmón ahumado;Lechuga:::Aguacate:0.5::Salmón ahum.:130:g:Tomates cherry:::Aceitunas negras:5::Pepino::
 #Cena;Gazpacho, verdura, gambitas y burger vegetal;Gazpacho:250:ml:Verdura:::Gambitas:40:g:Burger veget.:120:g
 #Cena;Ensalada de canónigos, lechuga y tofu;Canónigos:::Lechuga:::Frutos secos:15:g:Tofu:120:g:Tomate:::Aceitunas negras:4::Fruta:1:
